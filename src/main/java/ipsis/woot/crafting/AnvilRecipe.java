@@ -51,28 +51,43 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
 
     /**
      * Check if the given base item matches this recipe's base item
+     * Only checks item type, not NBT/components or count
      */
     public boolean isMatchingBase(ItemStack stack) {
-        return ItemStack.isSameItemSameComponents(baseItem, stack);
+        if (stack.isEmpty() || baseItem.isEmpty()) {
+            return false;
+        }
+        // Only check if it's the same item type (ignore NBT/components and count)
+        boolean matches = ItemStack.isSameItem(baseItem, stack);
+        Woot.LOGGER.debug("Base item comparison: recipe={}, player={}, matches={}",
+            baseItem.getItem(), stack.getItem(), matches);
+        return matches;
     }
 
     /**
      * Check if the collected items match this recipe's ingredients
      */
     public boolean matchesIngredients(List<ItemStack> collectedItems) {
+        Woot.LOGGER.debug("Matching ingredients for recipe. Required: {}, Available: {}",
+            ingredients.size(), collectedItems.size());
+
         // Create a mutable copy of collected items to track consumption
         List<ItemStack> remainingItems = collectedItems.stream()
             .map(ItemStack::copy)
             .collect(java.util.stream.Collectors.toList());
 
         // Try to match each ingredient
-        for (Ingredient ingredient : ingredients) {
+        for (int idx = 0; idx < ingredients.size(); idx++) {
+            Ingredient ingredient = ingredients.get(idx);
             boolean found = false;
+
+            Woot.LOGGER.debug("Looking for ingredient #{}: {}", idx, ingredient);
 
             // Find a matching item in the remaining items
             for (int i = 0; i < remainingItems.size(); i++) {
                 ItemStack stack = remainingItems.get(i);
                 if (!stack.isEmpty() && ingredient.test(stack)) {
+                    Woot.LOGGER.debug("  Found match: {} (removing from available list)", stack);
                     remainingItems.remove(i);
                     found = true;
                     break;
@@ -80,10 +95,12 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
             }
 
             if (!found) {
+                Woot.LOGGER.debug("  Ingredient #{} NOT found! Missing: {}", idx, ingredient);
                 return false; // Missing ingredient
             }
         }
 
+        Woot.LOGGER.debug("All {} ingredients matched successfully!", ingredients.size());
         return true;
     }
 
