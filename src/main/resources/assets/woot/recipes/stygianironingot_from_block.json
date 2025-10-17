@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "woot:stygianiron"
+    }
+  ],
+  "result": {
+    "item": "woot:stygianironingot",
+    "count": 9
+  }
+}
