@@ -5,6 +5,7 @@ import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.crafting.AnvilRecipe;
 import ipsis.woot.util.AnvilHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,12 +14,19 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -28,10 +36,44 @@ import java.util.List;
  * Stygian Iron Anvil Block
  * Used for special crafting recipes activated with the YahHammer
  */
-public class AnvilBlock extends Block implements EntityBlock {
+public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBlock {
+
+    // Anvil collision shapes for each facing direction
+    private static final VoxelShape SHAPE_NORTH_SOUTH = Shapes.or(
+        Block.box(2, 0, 2, 14, 4, 14),      // Base
+        Block.box(4, 4, 3, 12, 5, 13),      // Lower narrow
+        Block.box(6, 5, 4, 10, 10, 12),     // Middle section
+        Block.box(3, 10, 0, 13, 16, 16)     // Top
+    );
+
+    private static final VoxelShape SHAPE_EAST_WEST = Shapes.or(
+        Block.box(2, 0, 2, 14, 4, 14),      // Base
+        Block.box(3, 4, 4, 13, 5, 12),      // Lower narrow (rotated)
+        Block.box(4, 5, 6, 12, 10, 10),     // Middle section (rotated)
+        Block.box(0, 10, 3, 16, 16, 13)     // Top (rotated)
+    );
 
     public AnvilBlock(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection());
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        Direction facing = state.getValue(FACING);
+        return (facing == Direction.NORTH || facing == Direction.SOUTH) ? SHAPE_NORTH_SOUTH : SHAPE_EAST_WEST;
     }
 
     @Nullable
@@ -125,9 +167,12 @@ public class AnvilBlock extends Block implements EntityBlock {
             ingredients.add(itemEntity.getItem());
         }
 
+        ipsis.woot.Woot.LOGGER.info("Anvil crafting attempt - Base: {}, Ingredients: {}", baseItem, ingredients);
+
         // Try to find a matching recipe
         AnvilRecipe recipe = AnvilHelper.findRecipe(level, baseItem, ingredients);
         if (recipe == null) {
+            ipsis.woot.Woot.LOGGER.warn("No matching recipe found for base {} with ingredients {}", baseItem, ingredients);
             player.displayClientMessage(Component.translatable("chat.woot.anvil.invalid"), true);
             level.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.0F, 1.0F);
             return;
