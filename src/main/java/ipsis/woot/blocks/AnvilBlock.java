@@ -1,5 +1,6 @@
 package ipsis.woot.blocks;
 
+import com.mojang.serialization.MapCodec;
 import ipsis.woot.blockentities.AnvilBlockEntity;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.crafting.AnvilRecipe;
@@ -38,6 +39,8 @@ import java.util.List;
  */
 public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBlock {
 
+    public static final MapCodec<AnvilBlock> CODEC = simpleCodec(AnvilBlock::new);
+
     // Anvil collision shapes for each facing direction
     private static final VoxelShape SHAPE_NORTH_SOUTH = Shapes.or(
         Block.box(2, 0, 2, 14, 4, 14),      // Base
@@ -56,6 +59,11 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
     public AnvilBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
     }
 
     @Override
