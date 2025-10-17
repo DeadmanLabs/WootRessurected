@@ -1,0 +1,17 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "id": "minecraft:iron_bars",
+    "count": 1
+  },
+  "ingredients": [
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "id": "woot:die_mesh",
+    "count": 1
+  },
+  "preserve_base": false
+}

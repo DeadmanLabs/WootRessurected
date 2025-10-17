@@ -23,7 +23,11 @@ import java.util.List;
  * - An output item
  * - A preserveBase flag (whether to return the base item after crafting)
  */
-public class AnvilRecipe implements Recipe<CraftingInput> {
+public class AnvilRecipe implements Recipe<RecipeInput> {
+
+    static {
+        Woot.LOGGER.info("AnvilRecipe class is being loaded/initialized");
+    }
 
     private final ItemStack baseItem;
     private final List<Ingredient> ingredients;
@@ -106,13 +110,13 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
 
     // Recipe interface implementation
     @Override
-    public boolean matches(CraftingInput container, Level level) {
+    public boolean matches(RecipeInput input, Level level) {
         // This is not used for anvil crafting - we use custom matching logic
         return false;
     }
 
     @Override
-    public ItemStack assemble(CraftingInput container, HolderLookup.Provider registries) {
+    public ItemStack assemble(RecipeInput input, HolderLookup.Provider registries) {
         return result.copy();
     }
 
@@ -141,14 +145,19 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
      */
     public static class Serializer implements RecipeSerializer<AnvilRecipe> {
 
-        public static final MapCodec<AnvilRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
+        public Serializer() {
+            Woot.LOGGER.info("AnvilRecipe.Serializer constructor called!");
+        }
+
+        public static final MapCodec<AnvilRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> {
+            Woot.LOGGER.info("AnvilRecipe CODEC is being built/used");
+            return instance.group(
                 ItemStack.CODEC.fieldOf("base").forGetter(r -> r.baseItem),
                 Ingredient.CODEC.listOf().fieldOf("ingredients").forGetter(r -> r.ingredients),
                 ItemStack.CODEC.fieldOf("result").forGetter(r -> r.result),
                 Codec.BOOL.optionalFieldOf("preserve_base", false).forGetter(r -> r.preserveBase)
-            ).apply(instance, AnvilRecipe::new)
-        );
+            ).apply(instance, AnvilRecipe::new);
+        });
 
         public static final StreamCodec<RegistryFriendlyByteBuf, AnvilRecipe> STREAM_CODEC = StreamCodec.of(
             Serializer::toNetwork,
@@ -157,6 +166,7 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
 
         @Override
         public MapCodec<AnvilRecipe> codec() {
+            Woot.LOGGER.info("AnvilRecipe.Serializer.codec() method called!");
             return CODEC;
         }
 
@@ -166,6 +176,7 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
         }
 
         private static AnvilRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+            Woot.LOGGER.info("AnvilRecipe.Serializer.fromNetwork() called!");
             ItemStack baseItem = ItemStack.STREAM_CODEC.decode(buffer);
 
             int ingredientCount = buffer.readVarInt();
@@ -177,10 +188,12 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
             ItemStack result = ItemStack.STREAM_CODEC.decode(buffer);
             boolean preserveBase = buffer.readBoolean();
 
+            Woot.LOGGER.info("AnvilRecipe.Serializer.fromNetwork() - Successfully decoded recipe");
             return new AnvilRecipe(baseItem, ingredients, result, preserveBase);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf buffer, AnvilRecipe recipe) {
+            Woot.LOGGER.info("AnvilRecipe.Serializer.toNetwork() called!");
             ItemStack.STREAM_CODEC.encode(buffer, recipe.baseItem);
 
             buffer.writeVarInt(recipe.ingredients.size());
@@ -190,6 +203,7 @@ public class AnvilRecipe implements Recipe<CraftingInput> {
 
             ItemStack.STREAM_CODEC.encode(buffer, recipe.result);
             buffer.writeBoolean(recipe.preserveBase);
+            Woot.LOGGER.info("AnvilRecipe.Serializer.toNetwork() - Successfully encoded recipe");
         }
     }
 }

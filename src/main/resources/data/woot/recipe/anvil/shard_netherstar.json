@@ -1,0 +1,17 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "id": "woot:die_shard",
+    "count": 1
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:nether_star"
+    }
+  ],
+  "result": {
+    "id": "woot:shard_netherstar",
+    "count": 9
+  },
+  "preserve_base": true
+}

@@ -175,12 +175,12 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
             ingredients.add(itemEntity.getItem());
         }
 
-        ipsis.woot.Woot.LOGGER.info("Anvil crafting attempt - Base: {}, Ingredients: {}", baseItem, ingredients);
+        ipsis.woot.Woot.LOGGER.debug("Anvil crafting attempt - Base: {}, Ingredients: {}", baseItem, ingredients);
 
         // Try to find a matching recipe
         AnvilRecipe recipe = AnvilHelper.findRecipe(level, baseItem, ingredients);
         if (recipe == null) {
-            ipsis.woot.Woot.LOGGER.warn("No matching recipe found for base {} with ingredients {}", baseItem, ingredients);
+            ipsis.woot.Woot.LOGGER.debug("No matching recipe found for base {} with ingredients {}", baseItem, ingredients);
             player.displayClientMessage(Component.translatable("chat.woot.anvil.invalid"), true);
             level.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.0F, 1.0F);
             return;
@@ -203,8 +203,5 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
         // Spawn the output item in the world
         ItemEntity outputEntity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, output);
         level.addFreshEntity(outputEntity);
-
-        // Success message
-        player.displayClientMessage(Component.translatable("chat.woot.anvil.success"), true);
     }
 }

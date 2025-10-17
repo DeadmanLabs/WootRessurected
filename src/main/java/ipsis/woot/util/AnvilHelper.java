@@ -66,30 +66,31 @@ public class AnvilHelper {
             return null;
         }
 
-        int anvilRecipeCount = 0;
-        // Get all anvil recipes from the recipe manager
-        for (RecipeHolder<?> recipeHolder : level.getRecipeManager().getRecipes()) {
-            if (recipeHolder.value() instanceof AnvilRecipe anvilRecipe) {
-                anvilRecipeCount++;
-                Woot.LOGGER.debug("Checking anvil recipe: {} - Base: {}", recipeHolder.id(), anvilRecipe.getBaseItem());
+        // Get all anvil recipes using getAllRecipesFor
+        var anvilRecipes = level.getRecipeManager().getAllRecipesFor(Woot.ANVIL_RECIPE_TYPE.get());
+        Woot.LOGGER.debug("Found {} anvil recipes in RecipeManager", anvilRecipes.size());
 
-                // Check if base item matches
-                if (anvilRecipe.isMatchingBase(baseItem)) {
-                    Woot.LOGGER.debug("  Base item matches! Checking ingredients...");
-                    // Check if ingredients match
-                    if (anvilRecipe.matchesIngredients(ingredients)) {
-                        Woot.LOGGER.info("Found matching recipe: {}", recipeHolder.id());
-                        return anvilRecipe;
-                    } else {
-                        Woot.LOGGER.debug("  Ingredients don't match. Required: {}", anvilRecipe.getAnvilIngredients());
-                    }
+        for (RecipeHolder<AnvilRecipe> recipeHolder : anvilRecipes) {
+            AnvilRecipe anvilRecipe = recipeHolder.value();
+
+            Woot.LOGGER.debug("Checking anvil recipe: {} - Base: {}", recipeHolder.id(), anvilRecipe.getBaseItem());
+
+            // Check if base item matches
+            if (anvilRecipe.isMatchingBase(baseItem)) {
+                Woot.LOGGER.debug("  Base item matches! Checking ingredients...");
+                // Check if ingredients match
+                if (anvilRecipe.matchesIngredients(ingredients)) {
+                    Woot.LOGGER.debug("Found matching recipe: {}", recipeHolder.id());
+                    return anvilRecipe;
                 } else {
-                    Woot.LOGGER.debug("  Base item doesn't match");
+                    Woot.LOGGER.debug("  Ingredients don't match. Required: {}", anvilRecipe.getAnvilIngredients());
                 }
+            } else {
+                Woot.LOGGER.debug("  Base item doesn't match");
             }
         }
 
-        Woot.LOGGER.warn("No matching recipe found. Total anvil recipes loaded: {}", anvilRecipeCount);
+        Woot.LOGGER.debug("No matching recipe found. Total anvil recipes loaded: {}", anvilRecipes.size());
         return null;
     }
 
