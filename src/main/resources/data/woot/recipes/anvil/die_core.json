@@ -1,7 +1,8 @@
 {
   "type": "woot:anvil",
   "base": {
-    "item": "minecraft:redstone"
+    "id": "minecraft:redstone",
+    "count": 1
   },
   "ingredients": [
     {
@@ -9,7 +10,8 @@
     }
   ],
   "result": {
-    "item": "woot:die_core"
+    "id": "woot:die_core",
+    "count": 1
   },
   "preserve_base": false
 }

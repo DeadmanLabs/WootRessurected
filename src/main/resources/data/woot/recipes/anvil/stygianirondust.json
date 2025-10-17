@@ -1,7 +1,8 @@
 {
   "type": "woot:anvil",
   "base": {
-    "item": "woot:die_mesh"
+    "id": "woot:die_mesh",
+    "count": 1
   },
   "ingredients": [
     {
@@ -15,7 +16,7 @@
     }
   ],
   "result": {
-    "item": "woot:stygianirondust",
+    "id": "woot:stygianirondust",
     "count": 3
   },
   "preserve_base": true

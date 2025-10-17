@@ -1,7 +1,8 @@
 {
   "type": "woot:anvil",
   "base": {
-    "item": "woot:die_core"
+    "id": "woot:die_core",
+    "count": 1
   },
   "ingredients": [
     {
@@ -15,7 +16,8 @@
     }
   ],
   "result": {
-    "item": "woot:factorycore_heart"
+    "id": "woot:factorycore_heart",
+    "count": 1
   },
   "preserve_base": true
 }

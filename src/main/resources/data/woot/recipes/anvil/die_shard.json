@@ -1,7 +1,8 @@
 {
   "type": "woot:anvil",
   "base": {
-    "item": "minecraft:quartz"
+    "id": "minecraft:quartz",
+    "count": 1
   },
   "ingredients": [
     {
@@ -9,7 +10,8 @@
     }
   ],
   "result": {
-    "item": "woot:die_shard"
+    "id": "woot:die_shard",
+    "count": 1
   },
   "preserve_base": false
 }

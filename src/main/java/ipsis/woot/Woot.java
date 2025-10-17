@@ -299,5 +299,8 @@ public class Woot {
 
     private void commonSetup(FMLCommonSetupEvent event) {
         LOGGER.info("Woot common setup complete!");
+        LOGGER.info("Registered recipe types:");
+        LOGGER.info("  - Anvil Recipe Type: {}", ANVIL_RECIPE_TYPE.getId());
+        LOGGER.info("  - Anvil Recipe Serializer: {}", ANVIL_RECIPE_SERIALIZER.getId());
     }
 }

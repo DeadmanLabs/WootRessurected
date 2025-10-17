@@ -1,7 +1,8 @@
 {
   "type": "woot:anvil",
   "base": {
-    "item": "woot:die_core"
+    "id": "woot:die_core",
+    "count": 1
   },
   "ingredients": [
     {
@@ -15,7 +16,8 @@
     }
   ],
   "result": {
-    "item": "woot:factorycore_t2_upgrade"
+    "id": "woot:factorycore_t2_upgrade",
+    "count": 1
   },
   "preserve_base": true
 }
