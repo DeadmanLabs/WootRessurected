@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IRI",
+    "RCR",
+    "IBI"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:enchanted_book"
+    },
+    "I": {
+      "item": "woot:cell"
+    },
+    "C": {
+      "item": "woot:factorycore_power"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "item": "woot:cell"
+  }
+}

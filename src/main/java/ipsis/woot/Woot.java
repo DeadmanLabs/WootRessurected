@@ -1,6 +1,8 @@
 package ipsis.woot;
 
 import com.mojang.logging.LogUtils;
+import ipsis.woot.blockentities.WootBlockEntities;
+import ipsis.woot.blocks.AnvilBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
@@ -37,8 +39,8 @@ public class Woot {
         BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.METAL));
     public static final DeferredBlock<Block> SOUL_STONE = BLOCKS.registerSimpleBlock("soulstone",
         BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 6.0F).sound(SoundType.STONE));
-    public static final DeferredBlock<Block> ANVIL = BLOCKS.registerSimpleBlock("anvil",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).sound(SoundType.ANVIL));
+    public static final DeferredBlock<Block> ANVIL = BLOCKS.register("anvil", () ->
+        new AnvilBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).sound(SoundType.ANVIL)));
     public static final DeferredBlock<Block> LAYOUT = BLOCKS.registerSimpleBlock("layout",
         BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.0F).sound(SoundType.STONE));
     public static final DeferredBlock<Block> FACTORY_HEART = BLOCKS.registerSimpleBlock("factory_heart",
@@ -271,6 +273,7 @@ public class Woot {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        WootBlockEntities.BLOCK_ENTITIES.register(modEventBus);
 
         LOGGER.info("Woot mod initialized with ALL variants!");
     }

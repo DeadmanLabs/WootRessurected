@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:ec_blood_tank"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:factorycore_t2_upgrade"
+    },
+    {
+      "item": "evilcraft:sanguinary_pedestal"
+    },
+    {
+      "item": "evilcraft:spiked_plate"
+    }
+  ],
+  "result": {
+    "item": "woot:upgradeb"
+  }
+}

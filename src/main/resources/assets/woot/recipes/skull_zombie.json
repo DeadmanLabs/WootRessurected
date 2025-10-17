@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " B ",
+    "BsB",
+    " B "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:rotten_flesh"
+    },
+    "s": {
+      "tag": "forge:itemSkull"
+    }
+  },
+  "result": {
+    "item": "minecraft:skull"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "SIS",
+    " S "
+  ],
+  "key": {
+    "I": {
+      "item": "woot:stygianironplate"
+    },
+    "S": {
+      "item": "woot:soulstone"
+    }
+  },
+  "result": {
+    "item": "woot:factorybase",
+    "count": 4
+  }
+}

@@ -3,11 +3,13 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "woot:stygianiron"
+      "item": "minecraft:soul_sand"
+    },
+    {
+      "item": "woot:yahhammer"
     }
   ],
   "result": {
-    "item": "woot:stygianironingot",
-    "count": 9
+    "item": "woot:soulsanddust"
   }
 }

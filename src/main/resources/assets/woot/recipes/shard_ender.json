@@ -3,11 +3,10 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "woot:stygianiron"
+      "item": "woot:endershard"
     }
   ],
   "result": {
-    "item": "woot:stygianironingot",
-    "count": 9
+    "item": "woot:endershard"
   }
 }

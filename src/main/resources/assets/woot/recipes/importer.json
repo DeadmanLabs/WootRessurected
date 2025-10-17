@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "minecraft:hopper"
+    },
+    {
+      "tag": "forge:chest"
+    },
+    {
+      "item": "minecraft:bucket"
+    }
+  ],
+  "result": {
+    "item": "woot:importer"
+  }
+}

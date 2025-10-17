@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:vanilla_die_crafting"
+    }
+  ],
+  "pattern": [
+    "HD ",
+    " P ",
+    "R I"
+  ],
+  "key": {
+    "H": {
+      "item": "woot:yahhammer"
+    },
+    "D": {
+      "item": "woot:die_core"
+    },
+    "P": {
+      "item": "woot:stygianironplate"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "item": "woot:factorycore_t1_upgrade"
+  }
+}

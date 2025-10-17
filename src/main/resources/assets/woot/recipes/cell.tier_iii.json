@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " I ",
+    "PCE",
+    "IDI"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:enchanted_book"
+    },
+    "E": {
+      "item": "minecraft:enchanted_book"
+    },
+    "I": {
+      "item": "woot:cell"
+    },
+    "C": {
+      "item": "woot:factorycore_power"
+    },
+    "D": {
+      "item": "minecraft:dragon_egg"
+    }
+  },
+  "result": {
+    "item": "woot:cell"
+  }
+}

@@ -1,18 +1,21 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
+  "category": "misc",
   "pattern": [
-    "SSS",
-    "SSS",
-    "SSS"
+    "   ",
+    "SDS",
+    "   "
   ],
   "key": {
-    "S": {
+    "D": {
       "item": "woot:soulsanddust"
+    },
+    "S": {
+      "item": "minecraft:cobblestone"
     }
   },
   "result": {
     "item": "woot:soulstone",
-    "count": 1
+    "count": 2
   }
 }

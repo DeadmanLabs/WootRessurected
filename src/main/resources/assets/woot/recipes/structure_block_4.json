@@ -3,11 +3,13 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "woot:stygianiron"
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:shard_netherstar"
     }
   ],
   "result": {
-    "item": "woot:stygianironingot",
-    "count": 9
+    "item": "woot:structure"
   }
 }

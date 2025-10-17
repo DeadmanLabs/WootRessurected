@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:factorycore_cap"
+    },
+    {
+      "item": "woot:shard_diamond"
+    },
+    {
+      "item": "minecraft:skull"
+    }
+  ],
+  "result": {
+    "item": "woot:structure"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " R ",
+    " B ",
+    " C "
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "B": {
+      "item": "woot:factorybase"
+    },
+    "C": {
+      "item": "woot:factorycore_power"
+    }
+  },
+  "result": {
+    "item": "woot:cell"
+  }
+}

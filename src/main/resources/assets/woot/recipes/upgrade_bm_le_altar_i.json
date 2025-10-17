@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:bm_le_altar"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:factorycore_t1_upgrade"
+    },
+    {
+      "item": "bloodmagic:slate"
+    }
+  ],
+  "result": {
+    "item": "woot:upgradeb"
+  }
+}

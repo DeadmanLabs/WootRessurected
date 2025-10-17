@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:vanilla_die_crafting"
+    }
+  ],
+  "pattern": [
+    "HD ",
+    "INS",
+    "   "
+  ],
+  "key": {
+    "H": {
+      "item": "woot:yahhammer"
+    },
+    "D": {
+      "item": "woot:die_mesh"
+    },
+    "I": {
+      "item": "minecraft:iron_ore"
+    },
+    "N": {
+      "item": "minecraft:netherrack"
+    },
+    "S": {
+      "item": "minecraft:soul_sand"
+    }
+  },
+  "result": {
+    "item": "woot:stygianirondust",
+    "count": 3
+  }
+}

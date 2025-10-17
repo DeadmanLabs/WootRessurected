@@ -1,12 +1,6 @@
 {
   "type": "minecraft:smelting",
-  "category": "misc",
-  "ingredient": {
-    "item": "woot:stygianironore"
-  },
   "result": {
     "item": "woot:stygianironingot"
-  },
-  "experience": 1.0,
-  "cookingtime": 200
+  }
 }
