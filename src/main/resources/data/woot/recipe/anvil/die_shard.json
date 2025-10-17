@@ -1,0 +1,15 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "minecraft:quartz"
+  },
+  "ingredients": [
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "item": "woot:die_shard"
+  },
+  "preserve_base": false
+}

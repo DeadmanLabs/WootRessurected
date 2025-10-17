@@ -1,0 +1,21 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "woot:die_core"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:magma_block"
+    },
+    {
+      "item": "woot:stygianiron"
+    },
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "item": "woot:factorycore_heart"
+  },
+  "preserve_base": true
+}

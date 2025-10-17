@@ -1,0 +1,15 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "minecraft:stone_slab"
+  },
+  "ingredients": [
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "item": "woot:die_plate"
+  },
+  "preserve_base": false
+}

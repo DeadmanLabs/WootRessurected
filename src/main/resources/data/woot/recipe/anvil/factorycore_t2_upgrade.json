@@ -1,0 +1,21 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "woot:die_core"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:glowstone_dust"
+    },
+    {
+      "item": "minecraft:gold_block"
+    },
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "item": "woot:factorycore_t2_upgrade"
+  },
+  "preserve_base": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "woot:die_shard"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:emerald"
+    }
+  ],
+  "result": {
+    "item": "woot:shard_emerald",
+    "count": 3
+  },
+  "preserve_base": true
+}

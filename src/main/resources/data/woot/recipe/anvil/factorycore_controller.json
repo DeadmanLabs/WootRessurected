@@ -1,0 +1,18 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "woot:die_core"
+  },
+  "ingredients": [
+    {
+      "item": "woot:prism"
+    },
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "item": "woot:factorycore_controller"
+  },
+  "preserve_base": true
+}

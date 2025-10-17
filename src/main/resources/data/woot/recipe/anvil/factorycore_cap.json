@@ -1,0 +1,18 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "woot:die_core"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:redstone_block"
+    },
+    {
+      "item": "woot:stygianironplate"
+    }
+  ],
+  "result": {
+    "item": "woot:factorycore_cap"
+  },
+  "preserve_base": true
+}

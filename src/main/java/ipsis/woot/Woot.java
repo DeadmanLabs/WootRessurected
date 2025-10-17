@@ -3,12 +3,15 @@ package ipsis.woot;
 import com.mojang.logging.LogUtils;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.blocks.AnvilBlock;
+import ipsis.woot.crafting.AnvilRecipe;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -31,6 +34,20 @@ public class Woot {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MODID);
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
+
+    // ========== RECIPE TYPES ==========
+    public static final DeferredHolder<RecipeType<?>, RecipeType<AnvilRecipe>> ANVIL_RECIPE_TYPE =
+        RECIPE_TYPES.register("anvil", () -> new RecipeType<AnvilRecipe>() {
+            @Override
+            public String toString() {
+                return "woot:anvil";
+            }
+        });
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AnvilRecipe>> ANVIL_RECIPE_SERIALIZER =
+        RECIPE_SERIALIZERS.register("anvil", AnvilRecipe.Serializer::new);
 
     // ========== SIMPLE BLOCKS ==========
     public static final DeferredBlock<Block> STYGIAN_IRON_ORE = BLOCKS.registerSimpleBlock("stygianironore",
@@ -274,6 +291,8 @@ public class Woot {
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         WootBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        RECIPE_TYPES.register(modEventBus);
+        RECIPE_SERIALIZERS.register(modEventBus);
 
         LOGGER.info("Woot mod initialized with ALL variants!");
     }

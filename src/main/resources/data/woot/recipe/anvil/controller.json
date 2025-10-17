@@ -1,0 +1,18 @@
+{
+  "type": "woot:anvil",
+  "base": {
+    "item": "woot:factorycore_controller"
+  },
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:endershard"
+    }
+  ],
+  "result": {
+    "item": "woot:controller"
+  },
+  "preserve_base": false
+}
