@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "description": "Ender Shard mob programming configuration",
+  "defaultKillCount": 1,
+  "mobConfigs": [
+    {
+      "mobName": "minecraft:ender_dragon",
+      "killCount": 3,
+      "canCapture": true,
+      "comment": "Ender Dragon requires 3 kills to program shard"
+    },
+    {
+      "mobName": "minecraft:wither",
+      "killCount": 3,
+      "canCapture": true,
+      "comment": "Wither requires 3 kills to program shard"
+    },
+    {
+      "mobName": "minecraft:elder_guardian",
+      "killCount": 2,
+      "canCapture": true,
+      "comment": "Elder Guardian requires 2 kills"
+    },
+    {
+      "mobName": "minecraft:warden",
+      "killCount": 5,
+      "canCapture": true,
+      "comment": "Warden requires 5 kills (very difficult mob)"
+    },
+    {
+      "mobName": "draconicevolution:chaosguardian",
+      "killCount": 5,
+      "canCapture": true,
+      "comment": "Chaos Guardian from Draconic Evolution - requires 5 kills"
+    },
+    {
+      "mobName": "draconicevolution:guardian_dragon",
+      "killCount": 4,
+      "canCapture": true,
+      "comment": "Guardian Dragon from Draconic Evolution - requires 4 kills"
+    }
+  ],
+  "entityBlacklist": [
+  ],
+  "modBlacklist": [
+  ],
+  "_comment_1": "mobConfigs: List of mob-specific configurations",
+  "_comment_2": "entityBlacklist: Specific entity IDs that cannot be captured (e.g., 'twilightforest:naga')",
+  "_comment_3": "modBlacklist: Entire mod namespaces to blacklist (e.g., 'botania')",
+  "_comment_4": "Set canCapture to false to prevent a mob from being capturable even if not blacklisted"
+}

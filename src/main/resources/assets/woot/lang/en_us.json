@@ -72,5 +72,18 @@
   "chat.woot.anvil.nomagma": "Anvil is not hot - place a magma block below it",
   "chat.woot.anvil.nobase": "No base item on anvil",
   "chat.woot.anvil.invalid": "Invalid recipe - check items and ingredients",
-  "chat.woot.anvil.success": "Crafting successful!"
+  "chat.woot.anvil.success": "Crafting successful!",
+
+  "chat.woot.endershard.success": "Ender Shard programmed: %s",
+  "chat.woot.endershard.failure": "This mob cannot be captured",
+  "chat.woot.endershard.already_programmed": "Shard already programmed",
+  "chat.woot.endershard.complete": "%s kills complete - Shard ready!",
+
+  "info.woot.endershard.0": "Hit a mob to program the shard",
+  "info.woot.endershard.1": "Then kill the mob to charge it",
+  "info.woot.endershard.2": "Use in factory to spawn mobs",
+  "info.woot.endershard.3": "Hold SHIFT for details",
+  "info.woot.endershard.unprogrammed": "Not Programmed",
+  "info.woot.endershard.programmed": "%s: %d/%d kills",
+  "info.woot.endershard.ready": "%s: Ready"
 }

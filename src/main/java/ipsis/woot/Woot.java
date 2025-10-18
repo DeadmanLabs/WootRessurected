@@ -3,7 +3,11 @@ package ipsis.woot;
 import com.mojang.logging.LogUtils;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.blocks.AnvilBlock;
+import ipsis.woot.config.EnderShardConfig;
 import ipsis.woot.crafting.AnvilRecipe;
+import ipsis.woot.items.EnderShardItem;
+import ipsis.woot.items.data.EnderShardData;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
@@ -36,6 +40,7 @@ public class Woot {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MODID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
 
     // ========== RECIPE TYPES ==========
     public static final DeferredHolder<RecipeType<?>, RecipeType<AnvilRecipe>> ANVIL_RECIPE_TYPE =
@@ -48,6 +53,13 @@ public class Woot {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AnvilRecipe>> ANVIL_RECIPE_SERIALIZER =
         RECIPE_SERIALIZERS.register("anvil", AnvilRecipe.Serializer::new);
+
+    // ========== DATA COMPONENTS ==========
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<EnderShardData>> ENDER_SHARD_DATA =
+        DATA_COMPONENT_TYPES.register("ender_shard_data", () -> DataComponentType.<EnderShardData>builder()
+            .persistent(EnderShardData.CODEC)
+            .networkSynchronized(EnderShardData.STREAM_CODEC)
+            .build());
 
     // ========== SIMPLE BLOCKS ==========
     public static final DeferredBlock<Block> STYGIAN_IRON_ORE = BLOCKS.registerSimpleBlock("stygianironore",
@@ -129,7 +141,7 @@ public class Woot {
     public static final DeferredItem<Item> FACTORY_BASE = ITEMS.registerSimpleItem("factorybase");
     public static final DeferredItem<Item> PRISM = ITEMS.registerSimpleItem("prism");
     public static final DeferredItem<Item> XP_SHARD = ITEMS.registerSimpleItem("xpshard");
-    public static final DeferredItem<Item> ENDER_SHARD = ITEMS.registerSimpleItem("endershard");
+    public static final DeferredItem<Item> ENDER_SHARD = ITEMS.register("endershard", () -> new EnderShardItem(new Item.Properties()));
     public static final DeferredItem<Item> YAH_HAMMER = ITEMS.registerSimpleItem("yahhammer");
     public static final DeferredItem<Item> BUILDER = ITEMS.registerSimpleItem("builder");
 
@@ -293,14 +305,21 @@ public class Woot {
         WootBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
+        DATA_COMPONENT_TYPES.register(modEventBus);
 
         LOGGER.info("Woot mod initialized with ALL variants!");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        LOGGER.info("Woot common setup starting...");
+
+        // Load ender shard configuration
+        EnderShardConfig.load();
+
         LOGGER.info("Woot common setup complete!");
         LOGGER.info("Registered recipe types:");
         LOGGER.info("  - Anvil Recipe Type: {}", ANVIL_RECIPE_TYPE.getId());
         LOGGER.info("  - Anvil Recipe Serializer: {}", ANVIL_RECIPE_SERIALIZER.getId());
+        LOGGER.info("Ender shard configuration loaded: {} mob configs", EnderShardConfig.getConfigCount());
     }
 }
