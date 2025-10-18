@@ -78,11 +78,13 @@
   "chat.woot.endershard.failure": "This mob cannot be captured",
   "chat.woot.endershard.already_programmed": "Shard already programmed",
   "chat.woot.endershard.complete": "%s kills complete - Shard ready!",
+  "chat.woot.endershard.reset": "Ender Shard reset",
 
   "info.woot.endershard.0": "Hit a mob to program the shard",
   "info.woot.endershard.1": "Then kill the mob to charge it",
   "info.woot.endershard.2": "Use in factory to spawn mobs",
   "info.woot.endershard.3": "Hold SHIFT for details",
+  "info.woot.endershard.reset": "SHIFT + Right-Click to reset",
   "info.woot.endershard.unprogrammed": "Not Programmed",
   "info.woot.endershard.programmed": "%s: %d/%d kills",
   "info.woot.endershard.ready": "%s: Ready"

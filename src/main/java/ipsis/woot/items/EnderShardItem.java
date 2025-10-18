@@ -6,11 +6,17 @@ import ipsis.woot.items.data.EnderShardData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -115,22 +121,50 @@ public class EnderShardItem extends Item {
     }
 
     /**
-     * Show enchantment glint effect when shard is full
+     * Show enchantment glint effect when shard is programmed
      */
     @Override
     public boolean isFoil(@Nonnull ItemStack stack) {
+        // Show glint for any programmed shard
+        return isProgrammed(stack);
+    }
+
+    /**
+     * Handle right-click to reset the shard
+     * Shift-right-click to clear programming data
+     */
+    @Override
+    public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+
+        // Only reset on shift-right-click
+        if (!player.isShiftKeyDown()) {
+            return InteractionResultHolder.pass(stack);
+        }
+
+        // Only reset if programmed
         if (!isProgrammed(stack)) {
-            return false;
+            return InteractionResultHolder.pass(stack);
         }
 
-        EnderShardData data = stack.get(Woot.ENDER_SHARD_DATA.get());
-        if (data == null) {
-            return false;
+        // Server-side only
+        if (!level.isClientSide()) {
+            // Clear the programming data
+            stack.remove(Woot.ENDER_SHARD_DATA.get());
+
+            // Play a sound
+            level.playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
+
+            // Show message
+            player.displayClientMessage(
+                Component.translatable("chat.woot.endershard.reset"),
+                true
+            );
+
+            Woot.LOGGER.debug("Player {} reset ender shard", player.getName().getString());
         }
 
-        // Get required kill count from config
-        int requiredKills = EnderShardConfig.getKillCount(data.entityKey());
-        return data.deathCount() >= requiredKills;
+        return InteractionResultHolder.success(stack);
     }
 
     /**
@@ -149,6 +183,11 @@ public class EnderShardItem extends Item {
         tooltip.add(Component.translatable("info.woot.endershard.1").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("info.woot.endershard.2").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("info.woot.endershard.3").withStyle(ChatFormatting.GRAY));
+
+        // Add reset instruction if programmed
+        if (isProgrammed(stack)) {
+            tooltip.add(Component.translatable("info.woot.endershard.reset").withStyle(ChatFormatting.YELLOW));
+        }
 
         EnderShardData data = stack.get(Woot.ENDER_SHARD_DATA.get());
 
