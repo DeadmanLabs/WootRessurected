@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import ipsis.woot.blockentities.AnvilBlockEntity;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.crafting.AnvilRecipe;
+import ipsis.woot.crafting.AnvilRecipeInput;
 import ipsis.woot.util.AnvilHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -186,8 +187,17 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
             return;
         }
 
-        // Recipe found! Craft the item
-        ItemStack output = recipe.assemble(null, level.registryAccess());
+        // Recipe found! Craft the item with data transfer
+        AnvilRecipeInput recipeInput = new AnvilRecipeInput(baseItem, ingredients);
+        ItemStack output = recipe.assembleWithDataTransfer(recipeInput, level.registryAccess());
+
+        // Check if assembly failed (e.g., ender shard not full)
+        if (output == null || output.isEmpty()) {
+            ipsis.woot.Woot.LOGGER.debug("Recipe assembly failed - ender shard may not be programmed or full");
+            player.displayClientMessage(Component.translatable("chat.woot.anvil.shard_not_full"), true);
+            level.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.0F, 1.0F);
+            return;
+        }
 
         // Clear base item if not preserved
         if (!recipe.shouldPreserveBase()) {

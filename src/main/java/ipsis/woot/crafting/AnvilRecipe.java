@@ -4,6 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ipsis.woot.Woot;
+import ipsis.woot.config.EnderShardConfig;
+import ipsis.woot.items.EnderShardItem;
+import ipsis.woot.items.WootDataComponents;
+import ipsis.woot.items.data.EnderShardData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -12,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -118,6 +123,48 @@ public class AnvilRecipe implements Recipe<RecipeInput> {
     @Override
     public ItemStack assemble(RecipeInput input, HolderLookup.Provider registries) {
         return result.copy();
+    }
+
+    /**
+     * Assemble the recipe with data transfer from ender shard to controller
+     * Returns null if the ender shard is not programmed or not full
+     */
+    @Nullable
+    public ItemStack assembleWithDataTransfer(AnvilRecipeInput input, HolderLookup.Provider registries) {
+        ItemStack output = result.copy();
+        ItemStack baseItem = input.baseItem();
+
+        // Check if base is an ender shard
+        if (!EnderShardItem.isEnderShard(baseItem)) {
+            // Not an ender shard, just return normal output
+            return output;
+        }
+
+        // Check if ender shard is programmed
+        if (!EnderShardItem.isProgrammed(baseItem)) {
+            Woot.LOGGER.debug("Ender shard is not programmed, cannot craft controller");
+            return null; // Not programmed
+        }
+
+        // Get the ender shard data
+        EnderShardData shardData = EnderShardItem.getProgrammedMob(baseItem);
+        if (shardData == null) {
+            Woot.LOGGER.debug("Ender shard data is null, cannot craft controller");
+            return null;
+        }
+
+        // Check if ender shard is full (has enough kills)
+        int requiredKills = EnderShardConfig.getKillCount(shardData.entityKey());
+        if (shardData.deathCount() < requiredKills) {
+            Woot.LOGGER.debug("Ender shard not full: {}/{} kills", shardData.deathCount(), requiredKills);
+            return null; // Not full
+        }
+
+        // Transfer ender shard data to output controller
+        output.set(WootDataComponents.ENDER_SHARD.get(), shardData);
+        Woot.LOGGER.info("Transferred ender shard data to controller: {}", shardData.displayName());
+
+        return output;
     }
 
     @Override

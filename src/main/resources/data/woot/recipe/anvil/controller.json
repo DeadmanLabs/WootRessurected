@@ -1,7 +1,7 @@
 {
   "type": "woot:anvil",
   "base": {
-    "id": "woot:factorycore_controller",
+    "id": "woot:endershard",
     "count": 1
   },
   "ingredients": [
@@ -9,7 +9,7 @@
       "item": "woot:factorybase"
     },
     {
-      "item": "woot:endershard"
+      "item": "woot:factorycore_controller"
     }
   ],
   "result": {

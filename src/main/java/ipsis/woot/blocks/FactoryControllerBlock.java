@@ -4,9 +4,13 @@ import com.mojang.serialization.MapCodec;
 import ipsis.woot.blockentities.FactoryControllerBlockEntity;
 import ipsis.woot.blockentities.FactoryHeartBlockEntity;
 import ipsis.woot.blockentities.WootBlockEntities;
+import ipsis.woot.items.WootDataComponents;
+import ipsis.woot.items.data.EnderShardData;
 import ipsis.woot.util.WootBlockNotifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -40,6 +44,21 @@ public class FactoryControllerBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(@Nonnull BlockPos pos, @Nonnull BlockState state) {
         return new FactoryControllerBlockEntity(pos, state);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state,
+                           @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+
+        // Read ender shard data from placed item and program the controller
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FactoryControllerBlockEntity controller) {
+            EnderShardData shardData = stack.get(WootDataComponents.ENDER_SHARD.get());
+            if (shardData != null) {
+                controller.programFromShard(shardData);
+                ipsis.woot.Woot.LOGGER.info("Programmed controller at {} with mob: {}", pos, shardData.displayName());
+            }
+        }
     }
 
     @Nullable

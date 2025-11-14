@@ -74,6 +74,7 @@
   "chat.woot.anvil.nomagma": "Anvil is not hot - place a magma block below it",
   "chat.woot.anvil.nobase": "No base item on anvil",
   "chat.woot.anvil.invalid": "Invalid recipe - check items and ingredients",
+  "chat.woot.anvil.shard_not_full": "Ender shard must be fully charged before crafting controller",
   "chat.woot.anvil.success": "Crafting successful!",
 
   "chat.woot.endershard.success": "Ender Shard programmed: %s",
