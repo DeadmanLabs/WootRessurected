@@ -336,18 +336,11 @@ public class Woot {
         LOGGER.info("Registering energy capabilities...");
 
         // Register energy capability for Factory Cell
-        // Only exposed when multiblock is formed
+        // Always exposed so tools like Jade can see it
         event.registerBlockEntity(
             Capabilities.EnergyStorage.BLOCK,
             WootBlockEntities.FACTORY_CELL.get(),
-            (blockEntity, direction) -> {
-                // Conditional capability: only when part of formed multiblock
-                if (blockEntity.isFormed()) {
-                    return blockEntity.getEnergyStorage();
-                }
-                // Return null when not formed - no capability exposed
-                return null;
-            }
+            (blockEntity, direction) -> blockEntity.getEnergyStorage()
         );
 
         // Register energy capability for Factory Heart

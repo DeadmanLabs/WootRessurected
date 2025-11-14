@@ -100,13 +100,19 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             blockEntity.farmStructure.clearChanged();
         }
 
+        // Update aggregated energy every 20 ticks for GUI display
+        if (blockEntity.tickCounter % 20 == 0) {
+            blockEntity.updateAggregatedEnergy();
+        }
+
         // Debug logging
         if (blockEntity.tickCounter % 100 == 0) {
             boolean formed = blockEntity.isFormed();
             if (formed) {
-                Woot.LOGGER.debug("Factory Heart at {} - Formed: {}, Tier: {}, Running: {}, Power: {}/{}",
+                Woot.LOGGER.debug("Factory Heart at {} - Formed: {}, Tier: {}, Running: {}, Power: {}/{}, Energy: {}/{}",
                     pos, formed, blockEntity.farmSetup != null ? blockEntity.farmSetup.getTier() : "N/A",
-                    blockEntity.isRunning, blockEntity.consumedPower, blockEntity.powerRecipe.getTotalPower());
+                    blockEntity.isRunning, blockEntity.consumedPower, blockEntity.powerRecipe.getTotalPower(),
+                    blockEntity.energyStorage.getEnergyStored(), blockEntity.energyStorage.getMaxEnergyStored());
             }
         }
 
@@ -115,6 +121,31 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             blockEntity.process((ServerLevel) level);
         } else {
             blockEntity.stopProcessing();
+        }
+    }
+
+    /**
+     * Update aggregated energy from cells for GUI display
+     */
+    private void updateAggregatedEnergy() {
+        if (farmSetup == null) {
+            return;
+        }
+
+        int totalCapacity = 0;
+        int totalStored = 0;
+
+        for (BlockPos cellPos : farmSetup.getCellPositions()) {
+            BlockEntity be = level.getBlockEntity(cellPos);
+            if (be instanceof FactoryCellBlockEntity cell) {
+                totalCapacity += cell.getMaxEnergyStored();
+                totalStored += cell.getEnergyStored();
+            }
+        }
+
+        // Recreate aggregated energy storage with current values
+        if (totalCapacity > 0) {
+            energyStorage = new FactoryEnergyStorage(totalCapacity, totalCapacity / 10, 0, totalStored);
         }
     }
 
@@ -143,7 +174,7 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         if (remainingPower > 0) {
             // Still need more power - consume per tick
             int powerPerTick = powerRecipe.getPowerPerTick();
-            int extracted = energyStorage.extractEnergy(powerPerTick, false);
+            int extracted = extractEnergyFromCells(powerPerTick);
 
             if (extracted > 0) {
                 consumedPower += extracted;
@@ -155,6 +186,38 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         if (consumedPower >= totalPower) {
             completeSpawnCycle(level);
         }
+    }
+
+    /**
+     * Extract energy from the physical cell blocks
+     */
+    private int extractEnergyFromCells(int amount) {
+        if (farmSetup == null) {
+            return 0;
+        }
+
+        int remaining = amount;
+        List<BlockPos> cellPositions = farmSetup.getCellPositions();
+
+        // Extract from cells until we have enough or run out
+        for (BlockPos cellPos : cellPositions) {
+            if (remaining <= 0) {
+                break;
+            }
+
+            BlockEntity be = level.getBlockEntity(cellPos);
+            if (be instanceof FactoryCellBlockEntity cell) {
+                IEnergyStorage cellStorage = cell.getEnergyStorage();
+                int extracted = cellStorage.extractEnergy(remaining, false);
+                remaining -= extracted;
+
+                if (extracted > 0) {
+                    cell.setChanged();
+                }
+            }
+        }
+
+        return amount - remaining;
     }
 
     /**
