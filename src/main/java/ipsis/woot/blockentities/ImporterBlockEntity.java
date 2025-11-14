@@ -138,13 +138,13 @@ public class ImporterBlockEntity extends BlockEntity implements Container {
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, HolderLookup.@Nonnull Provider registries) {
+    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         ContainerHelper.saveAllItems(tag, inventory, registries);
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, HolderLookup.@Nonnull Provider registries) {
+    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(tag, inventory, registries);
