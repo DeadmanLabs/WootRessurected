@@ -108,11 +108,26 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         // Debug logging
         if (blockEntity.tickCounter % 100 == 0) {
             boolean formed = blockEntity.isFormed();
+            boolean canProcess = blockEntity.canProcess();
             if (formed) {
-                Woot.LOGGER.debug("Factory Heart at {} - Formed: {}, Tier: {}, Running: {}, Power: {}/{}, Energy: {}/{}",
-                    pos, formed, blockEntity.farmSetup != null ? blockEntity.farmSetup.getTier() : "N/A",
-                    blockEntity.isRunning, blockEntity.consumedPower, blockEntity.powerRecipe.getTotalPower(),
+                Woot.LOGGER.info("Factory Heart at {} - Formed: {}, Programmed: {}, CanProcess: {}, Running: {}, Power: {}/{}, Energy: {}/{}",
+                    pos, formed,
+                    blockEntity.farmSetup != null && blockEntity.farmSetup.isProgrammed(),
+                    canProcess,
+                    blockEntity.isRunning,
+                    blockEntity.consumedPower, blockEntity.powerRecipe.getTotalPower(),
                     blockEntity.energyStorage.getEnergyStored(), blockEntity.energyStorage.getMaxEnergyStored());
+
+                // Extra debug if not processing
+                if (!canProcess) {
+                    if (blockEntity.farmSetup == null) {
+                        Woot.LOGGER.warn("  -> Cannot process: farmSetup is null");
+                    } else if (!blockEntity.farmSetup.isProgrammed()) {
+                        Woot.LOGGER.warn("  -> Cannot process: not programmed with mob");
+                    } else if (blockEntity.energyStorage.getEnergyStored() <= 0) {
+                        Woot.LOGGER.warn("  -> Cannot process: no energy stored");
+                    }
+                }
             }
         }
 
@@ -157,8 +172,8 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             return false;
         }
 
-        // For now, no ingredient requirements - just check if we have power capacity
-        return energyStorage.getMaxEnergyStored() > 0;
+        // Check if we have stored energy available
+        return energyStorage.getEnergyStored() > 0;
     }
 
     /**
