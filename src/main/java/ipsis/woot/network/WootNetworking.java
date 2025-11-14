@@ -2,7 +2,9 @@ package ipsis.woot.network;
 
 import ipsis.woot.Woot;
 import ipsis.woot.blockentities.FactoryHeartBlockEntity;
+import ipsis.woot.client.gui.FactoryHeartScreen;
 import ipsis.woot.gui.data.FarmUIInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -81,12 +83,18 @@ public class WootNetworking {
      */
     private static void handleFarmInfo(FarmInfoPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            // This will be handled by the GUI screen when it's implemented
-            // For now, just log receipt
             Woot.LOGGER.debug("Received farm info for position {}", payload.pos());
 
-            // The GUI screen will need to implement a static method or use a client handler
-            // to update its display when this packet arrives
+            // Update the GUI screen if it's currently open
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.screen instanceof FactoryHeartScreen screen) {
+                // Check if this payload is for the screen's heart
+                if (screen.getMenu().getHeartPos().equals(payload.pos())) {
+                    FarmUIInfo uiInfo = payload.toFarmUIInfo();
+                    screen.updateFarmInfo(uiInfo);
+                    Woot.LOGGER.debug("Updated FactoryHeartScreen with farm info");
+                }
+            }
         });
     }
 

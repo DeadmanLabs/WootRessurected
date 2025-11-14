@@ -10,6 +10,7 @@ import ipsis.woot.blocks.FactoryCellBlock;
 import ipsis.woot.blocks.LayoutBlock;
 import ipsis.woot.config.EnderShardConfig;
 import ipsis.woot.crafting.AnvilRecipe;
+import ipsis.woot.items.ControllerBlockItem;
 import ipsis.woot.items.EnderShardItem;
 import ipsis.woot.items.FactoryBuilderItem;
 import ipsis.woot.items.WootDataComponents;
@@ -180,7 +181,8 @@ public class Woot {
     public static final DeferredItem<BlockItem> ANVIL_ITEM = ITEMS.registerSimpleBlockItem("anvil", ANVIL);
     public static final DeferredItem<BlockItem> LAYOUT_ITEM = ITEMS.registerSimpleBlockItem("layout", LAYOUT);
     public static final DeferredItem<BlockItem> FACTORY_HEART_ITEM = ITEMS.registerSimpleBlockItem("factory_heart", FACTORY_HEART);
-    public static final DeferredItem<BlockItem> CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("controller", CONTROLLER);
+    public static final DeferredItem<BlockItem> CONTROLLER_ITEM = ITEMS.register("controller",
+        () -> new ControllerBlockItem(CONTROLLER.get(), new Item.Properties()));
     public static final DeferredItem<BlockItem> IMPORTER_ITEM = ITEMS.registerSimpleBlockItem("importer", IMPORTER);
     public static final DeferredItem<BlockItem> EXPORTER_ITEM = ITEMS.registerSimpleBlockItem("exporter", EXPORTER);
 

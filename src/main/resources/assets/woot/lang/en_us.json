@@ -90,5 +90,8 @@
   "info.woot.endershard.reset": "SHIFT + Right-Click to reset",
   "info.woot.endershard.unprogrammed": "Not Programmed",
   "info.woot.endershard.programmed": "%s: %d/%d kills",
-  "info.woot.endershard.ready": "%s: Ready"
+  "info.woot.endershard.ready": "%s: Ready",
+
+  "info.woot.controller.programmed": "Programmed: %s",
+  "info.woot.controller.unprogrammed": "Not Programmed"
 }

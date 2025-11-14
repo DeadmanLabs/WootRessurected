@@ -59,6 +59,9 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
     private int tickCounter = 0;
     private static final int REQUEST_INTERVAL = 20;
 
+    // Farm UI information (updated via network)
+    private FarmUIInfo farmUIInfo = new FarmUIInfo();
+
     public FactoryHeartScreen(FactoryHeartMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = WIDTH;
@@ -82,6 +85,14 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
 
     private void requestFarmInfo() {
         PacketDistributor.sendToServer(new RequestFarmInfoPayload(menu.getHeartPos()));
+    }
+
+    /**
+     * Update farm UI information from network packet
+     * Called by client-side network handler
+     */
+    public void updateFarmInfo(FarmUIInfo info) {
+        this.farmUIInfo = info;
     }
 
     @Override
@@ -167,8 +178,10 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
             int powerPerTick = menu.getRecipePowerPerTick();
             int totalTime = menu.getRecipeTotalTime();
 
-            // Line 1: "Tier I × 1" (white)
-            String tierLine = "Tier I × " + mobCount; // TODO: Get actual tier from network data
+            // Line 1: "Tier <TIER_NUMBER> <MOB> × <COUNT>" (white)
+            String tierRoman = getTierRoman(farmUIInfo.getTier().getLevel());
+            String mobName = farmUIInfo.getMobName().getString();
+            String tierLine = "Tier " + tierRoman + " " + mobName + " \u00D7 " + mobCount;
             drawText(guiGraphics, tierLine, contentX, contentY, COLOR_WHITE);
             contentY += getTextHeight();
 
@@ -260,6 +273,16 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
     }
 
     // Helper methods
+
+    private String getTierRoman(int level) {
+        return switch (level) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            default -> "I";
+        };
+    }
 
     private void drawSizedRect(GuiGraphics guiGraphics, int x1, int y1, int width, int height, int color) {
         guiGraphics.fill(x1, y1, x1 + width, y1 + height, 0xFF000000 | color);
