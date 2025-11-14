@@ -1,0 +1,12 @@
+{
+  "parent": "woot:block/small_cube",
+  "textures": {
+    "down": "#all",
+    "up": "#all",
+    "north": "#all",
+    "south": "#all",
+    "west": "#all",
+    "east": "#all",
+    "particle": "#all"
+  }
+}

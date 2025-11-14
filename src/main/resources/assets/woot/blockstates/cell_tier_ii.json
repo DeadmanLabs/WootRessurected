@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "formed=false": {
       "model": "woot:block/cell_tier_ii"
+    },
+    "formed=true": {
+      "model": "woot:block/cell_tier_ii_formed"
     }
   }
 }

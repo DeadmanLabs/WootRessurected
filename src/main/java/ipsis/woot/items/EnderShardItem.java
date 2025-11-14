@@ -2,6 +2,7 @@ package ipsis.woot.items;
 
 import ipsis.woot.Woot;
 import ipsis.woot.config.EnderShardConfig;
+import ipsis.woot.items.WootDataComponents;
 import ipsis.woot.items.data.EnderShardData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -45,7 +46,7 @@ public class EnderShardItem extends Item {
         if (!isEnderShard(stack)) {
             return false;
         }
-        EnderShardData data = stack.get(Woot.ENDER_SHARD_DATA.get());
+        EnderShardData data = stack.get(WootDataComponents.ENDER_SHARD.get());
         return data != null && data.isValid();
     }
 
@@ -56,7 +57,7 @@ public class EnderShardItem extends Item {
         if (!isProgrammed(stack)) {
             return false;
         }
-        EnderShardData data = stack.get(Woot.ENDER_SHARD_DATA.get());
+        EnderShardData data = stack.get(WootDataComponents.ENDER_SHARD.get());
         return data != null && data.deathCount() >= requiredKills;
     }
 
@@ -68,7 +69,7 @@ public class EnderShardItem extends Item {
         if (!isEnderShard(stack)) {
             return null;
         }
-        return stack.get(Woot.ENDER_SHARD_DATA.get());
+        return stack.get(WootDataComponents.ENDER_SHARD.get());
     }
 
     /**
@@ -86,7 +87,7 @@ public class EnderShardItem extends Item {
 
         // Create new ender shard data
         EnderShardData data = EnderShardData.create(entityKey, displayName);
-        stack.set(Woot.ENDER_SHARD_DATA.get(), data);
+        stack.set(WootDataComponents.ENDER_SHARD.get(), data);
     }
 
     /**
@@ -97,10 +98,10 @@ public class EnderShardItem extends Item {
             return;
         }
 
-        EnderShardData data = stack.get(Woot.ENDER_SHARD_DATA.get());
+        EnderShardData data = stack.get(WootDataComponents.ENDER_SHARD.get());
         if (data != null) {
             EnderShardData newData = data.incrementDeaths(amount);
-            stack.set(Woot.ENDER_SHARD_DATA.get(), newData);
+            stack.set(WootDataComponents.ENDER_SHARD.get(), newData);
         }
     }
 
@@ -150,7 +151,7 @@ public class EnderShardItem extends Item {
         // Server-side only
         if (!level.isClientSide()) {
             // Clear the programming data
-            stack.remove(Woot.ENDER_SHARD_DATA.get());
+            stack.remove(WootDataComponents.ENDER_SHARD.get());
 
             // Play a sound
             level.playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -189,7 +190,7 @@ public class EnderShardItem extends Item {
             tooltip.add(Component.translatable("info.woot.endershard.reset").withStyle(ChatFormatting.YELLOW));
         }
 
-        EnderShardData data = stack.get(Woot.ENDER_SHARD_DATA.get());
+        EnderShardData data = stack.get(WootDataComponents.ENDER_SHARD.get());
 
         if (data == null || !data.isValid()) {
             // Unprogrammed shard

@@ -20,4 +20,38 @@ public class WootBlockEntities {
                             Woot.ANVIL.get()
                     ).build(null)
             );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FactoryHeartBlockEntity>> FACTORY_HEART =
+            BLOCK_ENTITIES.register("factory_heart", () ->
+                    BlockEntityType.Builder.of(
+                            FactoryHeartBlockEntity::new,
+                            Woot.FACTORY_HEART.get()
+                    ).build(null)
+            );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FactoryControllerBlockEntity>> FACTORY_CONTROLLER =
+            BLOCK_ENTITIES.register("factory_controller", () ->
+                    BlockEntityType.Builder.of(
+                            FactoryControllerBlockEntity::new,
+                            Woot.CONTROLLER.get()
+                    ).build(null)
+            );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FactoryCellBlockEntity>> FACTORY_CELL =
+            BLOCK_ENTITIES.register("factory_cell", () ->
+                    BlockEntityType.Builder.of(
+                            FactoryCellBlockEntity::new,
+                            Woot.CELL_TIER_I.get(),
+                            Woot.CELL_TIER_II.get(),
+                            Woot.CELL_TIER_III.get()
+                    ).build(null)
+            );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LayoutBlockEntity>> LAYOUT =
+            BLOCK_ENTITIES.register("layout", () ->
+                    BlockEntityType.Builder.of(
+                            LayoutBlockEntity::new,
+                            Woot.LAYOUT.get()
+                    ).build(null)
+            );
 }

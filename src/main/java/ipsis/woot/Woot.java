@@ -3,9 +3,16 @@ package ipsis.woot;
 import com.mojang.logging.LogUtils;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.blocks.AnvilBlock;
+import ipsis.woot.blocks.FactoryHeartBlock;
+import ipsis.woot.blocks.FactoryControllerBlock;
+import ipsis.woot.blocks.FactoryCellBlock;
+import ipsis.woot.blocks.LayoutBlock;
 import ipsis.woot.config.EnderShardConfig;
 import ipsis.woot.crafting.AnvilRecipe;
 import ipsis.woot.items.EnderShardItem;
+import ipsis.woot.items.FactoryBuilderItem;
+import ipsis.woot.items.WootDataComponents;
+import ipsis.woot.items.data.BuilderTierData;
 import ipsis.woot.items.data.EnderShardData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -40,7 +47,6 @@ public class Woot {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MODID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
-    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
 
     // ========== RECIPE TYPES ==========
     public static final DeferredHolder<RecipeType<?>, RecipeType<AnvilRecipe>> ANVIL_RECIPE_TYPE =
@@ -54,13 +60,6 @@ public class Woot {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AnvilRecipe>> ANVIL_RECIPE_SERIALIZER =
         RECIPE_SERIALIZERS.register("anvil", AnvilRecipe.Serializer::new);
 
-    // ========== DATA COMPONENTS ==========
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<EnderShardData>> ENDER_SHARD_DATA =
-        DATA_COMPONENT_TYPES.register("ender_shard_data", () -> DataComponentType.<EnderShardData>builder()
-            .persistent(EnderShardData.CODEC)
-            .networkSynchronized(EnderShardData.STREAM_CODEC)
-            .build());
-
     // ========== SIMPLE BLOCKS ==========
     public static final DeferredBlock<Block> STYGIAN_IRON_ORE = BLOCKS.registerSimpleBlock("stygianironore",
         BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.STONE));
@@ -70,12 +69,12 @@ public class Woot {
         BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 6.0F).sound(SoundType.STONE));
     public static final DeferredBlock<Block> ANVIL = BLOCKS.register("anvil", () ->
         new AnvilBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).sound(SoundType.ANVIL)));
-    public static final DeferredBlock<Block> LAYOUT = BLOCKS.registerSimpleBlock("layout",
-        BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.0F).sound(SoundType.STONE));
-    public static final DeferredBlock<Block> FACTORY_HEART = BLOCKS.registerSimpleBlock("factory_heart",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> CONTROLLER = BLOCKS.registerSimpleBlock("controller",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredBlock<Block> LAYOUT = BLOCKS.register("layout", () ->
+        new LayoutBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.0F).sound(SoundType.STONE).noOcclusion()));
+    public static final DeferredBlock<Block> FACTORY_HEART = BLOCKS.register("factory_heart", () ->
+        new FactoryHeartBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
+    public static final DeferredBlock<Block> CONTROLLER = BLOCKS.register("controller", () ->
+        new FactoryControllerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
     public static final DeferredBlock<Block> IMPORTER = BLOCKS.registerSimpleBlock("importer",
         BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
     public static final DeferredBlock<Block> EXPORTER = BLOCKS.registerSimpleBlock("exporter",
@@ -104,12 +103,12 @@ public class Woot {
         BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
 
     // ========== CELL BLOCKS (3 tiers) ==========
-    public static final DeferredBlock<Block> CELL_TIER_I = BLOCKS.registerSimpleBlock("cell_tier_i",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> CELL_TIER_II = BLOCKS.registerSimpleBlock("cell_tier_ii",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> CELL_TIER_III = BLOCKS.registerSimpleBlock("cell_tier_iii",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredBlock<Block> CELL_TIER_I = BLOCKS.register("cell_tier_i", () ->
+        new FactoryCellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), 1));
+    public static final DeferredBlock<Block> CELL_TIER_II = BLOCKS.register("cell_tier_ii", () ->
+        new FactoryCellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), 2));
+    public static final DeferredBlock<Block> CELL_TIER_III = BLOCKS.register("cell_tier_iii", () ->
+        new FactoryCellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), 3));
 
     // ========== UPGRADE BLOCKS (10 variants) ==========
     public static final DeferredBlock<Block> UPGRADE_XP = BLOCKS.registerSimpleBlock("upgrade_xp",
@@ -143,7 +142,8 @@ public class Woot {
     public static final DeferredItem<Item> XP_SHARD = ITEMS.registerSimpleItem("xpshard");
     public static final DeferredItem<Item> ENDER_SHARD = ITEMS.register("endershard", () -> new EnderShardItem(new Item.Properties()));
     public static final DeferredItem<Item> YAH_HAMMER = ITEMS.registerSimpleItem("yahhammer");
-    public static final DeferredItem<Item> BUILDER = ITEMS.registerSimpleItem("builder");
+    public static final DeferredItem<Item> BUILDER = ITEMS.register("builder", () ->
+        new FactoryBuilderItem(new Item.Properties()));
 
     // ========== DIE VARIANTS (4 types) ==========
     public static final DeferredItem<Item> DIE_MESH = ITEMS.registerSimpleItem("die_mesh");
@@ -305,7 +305,7 @@ public class Woot {
         WootBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
-        DATA_COMPONENT_TYPES.register(modEventBus);
+        WootDataComponents.DATA_COMPONENTS.register(modEventBus);
 
         LOGGER.info("Woot mod initialized with ALL variants!");
     }

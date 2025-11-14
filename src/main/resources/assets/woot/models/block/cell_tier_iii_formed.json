@@ -1,5 +1,5 @@
 {
-  "parent": "woot:block/small_cube_all",
+  "parent": "minecraft:block/cube_all",
   "textures": {
     "all": "woot:block/cell_tier_iii"
   }
