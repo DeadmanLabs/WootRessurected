@@ -11,14 +11,20 @@ import ipsis.woot.gui.FactoryHeartMenu;
 import ipsis.woot.gui.data.FarmUIInfo;
 import ipsis.woot.power.FactoryEnergyStorage;
 import ipsis.woot.power.PowerRecipe;
+import ipsis.woot.util.LootHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +32,8 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Factory Heart Block Entity - Main Controller
@@ -50,6 +58,10 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
     // Progress tracking
     private long consumedPower = 0;
     private int tickCounter = 0;
+    private boolean isRunning = false;
+
+    // Drop tracking for GUI
+    private List<ItemStack> lastDrops = new ArrayList<>();
 
     public FactoryHeartBlockEntity(BlockPos pos, BlockState state) {
         super(WootBlockEntities.FACTORY_HEART.get(), pos, state);
@@ -92,12 +104,158 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         if (blockEntity.tickCounter % 100 == 0) {
             boolean formed = blockEntity.isFormed();
             if (formed) {
-                Woot.LOGGER.debug("Factory Heart at {} - Formed: {}, Tier: {}",
-                    pos, formed, blockEntity.farmSetup != null ? blockEntity.farmSetup.getTier() : "N/A");
+                Woot.LOGGER.debug("Factory Heart at {} - Formed: {}, Tier: {}, Running: {}, Power: {}/{}",
+                    pos, formed, blockEntity.farmSetup != null ? blockEntity.farmSetup.getTier() : "N/A",
+                    blockEntity.isRunning, blockEntity.consumedPower, blockEntity.powerRecipe.getTotalPower());
             }
         }
 
-        // Phase 3 will add: power consumption, farming logic, loot generation
+        // Factory processing logic
+        if (blockEntity.canProcess()) {
+            blockEntity.process((ServerLevel) level);
+        } else {
+            blockEntity.stopProcessing();
+        }
+    }
+
+    /**
+     * Check if the factory can process
+     */
+    private boolean canProcess() {
+        if (farmSetup == null || !farmSetup.isProgrammed()) {
+            return false;
+        }
+
+        // For now, no ingredient requirements - just check if we have power capacity
+        return energyStorage.getMaxEnergyStored() > 0;
+    }
+
+    /**
+     * Process one tick of factory operation
+     */
+    private void process(ServerLevel level) {
+        isRunning = true;
+
+        // Try to consume power
+        long totalPower = powerRecipe.getTotalPower();
+        long remainingPower = totalPower - consumedPower;
+
+        if (remainingPower > 0) {
+            // Still need more power - consume per tick
+            int powerPerTick = powerRecipe.getPowerPerTick();
+            int extracted = energyStorage.extractEnergy(powerPerTick, false);
+
+            if (extracted > 0) {
+                consumedPower += extracted;
+                setChanged();
+            }
+        }
+
+        // Check if we've consumed enough power to complete a spawn cycle
+        if (consumedPower >= totalPower) {
+            completeSpawnCycle(level);
+        }
+    }
+
+    /**
+     * Complete a spawn cycle - generate loot and output to exporters
+     */
+    private void completeSpawnCycle(ServerLevel level) {
+        // Get the mob entity type
+        EntityType<?> entityType = getEntityType();
+        if (entityType == null) {
+            Woot.LOGGER.warn("Cannot spawn - invalid entity type");
+            resetProgress();
+            return;
+        }
+
+        // Generate loot from mob loot tables
+        int mobCount = getMobCount();
+        List<ItemStack> drops = LootHelper.generateLoot(level, entityType, 0, mobCount);
+        List<ItemStack> mergedDrops = LootHelper.mergeItemStacks(drops);
+
+        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops",
+            farmSetup.getProgrammedMob().displayName(), mobCount, mergedDrops.size());
+
+        // Store drops for GUI display
+        lastDrops = new ArrayList<>(mergedDrops);
+
+        // Output drops to exporters
+        outputDrops(mergedDrops);
+
+        // Reset progress for next cycle
+        resetProgress();
+    }
+
+    /**
+     * Output drops to exporter blocks
+     */
+    private void outputDrops(List<ItemStack> drops) {
+        if (farmSetup == null) {
+            return;
+        }
+
+        List<BlockPos> exporterPositions = farmSetup.getExporterPositions();
+        if (exporterPositions.isEmpty()) {
+            Woot.LOGGER.warn("No exporters found - dropping items at heart");
+            return;
+        }
+
+        // Try to insert items into exporters
+        for (ItemStack drop : drops) {
+            ItemStack remaining = drop.copy();
+
+            for (BlockPos exporterPos : exporterPositions) {
+                if (remaining.isEmpty()) {
+                    break;
+                }
+
+                BlockEntity be = level.getBlockEntity(exporterPos);
+                if (be instanceof ExporterBlockEntity exporter) {
+                    remaining = exporter.insertItem(remaining, false);
+                }
+            }
+
+            // If there's still items remaining, log a warning
+            if (!remaining.isEmpty()) {
+                Woot.LOGGER.warn("Could not output {} × {} - exporters full",
+                    remaining.getCount(), remaining.getDisplayName().getString());
+            }
+        }
+
+        setChanged();
+    }
+
+    /**
+     * Get the entity type from the programmed mob
+     */
+    @Nullable
+    private EntityType<?> getEntityType() {
+        if (farmSetup == null || !farmSetup.isProgrammed()) {
+            return null;
+        }
+
+        String entityKey = farmSetup.getProgrammedMob().entityKey();
+        ResourceLocation entityId = ResourceLocation.parse(entityKey);
+        return BuiltInRegistries.ENTITY_TYPE.get(entityId);
+    }
+
+    /**
+     * Reset progress for next cycle
+     */
+    private void resetProgress() {
+        consumedPower = 0;
+        setChanged();
+    }
+
+    /**
+     * Stop processing
+     */
+    private void stopProcessing() {
+        if (isRunning) {
+            isRunning = false;
+            setChanged();
+        }
     }
 
     /**
@@ -276,8 +434,7 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
      * Check if factory is currently running
      */
     public boolean isRunning() {
-        // Will be implemented in Phase 3 (farming logic)
-        return false;
+        return isRunning;
     }
 
     /**
@@ -339,9 +496,10 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
                 info.setMobName(Component.literal("Not Programmed"));
             }
 
-            // TODO Phase 3: Add ingredient and drop information
-            // farmSetup.getRequiredIngredients().forEach(info::addIngredientItem);
-            // farmSetup.getDrops().forEach(info::addDrop);
+            // Add drop information (show last generated drops)
+            for (ItemStack drop : lastDrops) {
+                info.addDrop(drop.copy());
+            }
         } else {
             info.setTier(ipsis.woot.multiblock.EnumMobFactoryTier.TIER_I);
             info.setMobName(Component.literal("No Structure"));

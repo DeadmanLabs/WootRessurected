@@ -161,6 +161,61 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
         // Drops Panel
         int dropsHeight = HEIGHT - (GUI_Y_MARGIN * 2) - RECIPE_HEIGHT - (PROGRESS_HEIGHT * 2) - INGREDIENT_HEIGHT - (PANEL_MARGIN * 4);
         renderDropsPanel(guiGraphics, GUI_X_MARGIN, yOffset, panelWidth, dropsHeight);
+
+        // Render tooltips for items (must be last)
+        renderDropTooltips(guiGraphics, mouseX, mouseY, GUI_X_MARGIN, yOffset, panelWidth, dropsHeight);
+    }
+
+    /**
+     * Render tooltips for drop items when hovering
+     */
+    private void renderDropTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int width, int height) {
+        int contentX = x + PANEL_X_MARGIN + 2;
+        int contentY = y + PANEL_Y_MARGIN + getTextHeight() + 2;
+
+        List<net.minecraft.world.item.ItemStack> drops = farmUIInfo.getDrops();
+        if (drops.isEmpty()) {
+            return;
+        }
+
+        int itemSize = 18;
+        int itemsPerRow = (width - PANEL_X_MARGIN * 2 - 4) / itemSize;
+        int mobCount = menu.getMobCount();
+        int row = 0;
+        int col = 0;
+
+        for (int i = 0; i < drops.size(); i++) {
+            net.minecraft.world.item.ItemStack stack = drops.get(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            int itemX = contentX + (col * itemSize);
+            int itemY = contentY + (row * itemSize);
+
+            // Check if mouse is hovering over this item
+            if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
+                // Calculate approximate drop chance
+                float dropChance = (stack.getCount() / (float) mobCount) * 100.0f;
+                String chanceText = String.format("%.1f%%", dropChance);
+
+                // Create tooltip components
+                List<Component> tooltip = new ArrayList<>();
+                tooltip.add(stack.getHoverName());
+                tooltip.add(Component.literal("Drop Chance: " + chanceText).withStyle(net.minecraft.ChatFormatting.GRAY));
+                tooltip.add(Component.literal("Average: " + stack.getCount() + " per " + mobCount + " mobs").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+
+                // Render tooltip
+                guiGraphics.renderTooltip(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
+                return; // Only show one tooltip at a time
+            }
+
+            col++;
+            if (col >= itemsPerRow) {
+                col = 0;
+                row++;
+            }
+        }
     }
 
     private void renderConfigurationPanel(GuiGraphics guiGraphics, int x, int y, int width, int height) {
@@ -269,7 +324,39 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
         // Yellow header
         drawText(guiGraphics, "Drops", x, y, COLOR_YELLOW);
 
-        // TODO Phase 3: Render drop item stacks
+        // Render drop items in a grid
+        int contentX = x + PANEL_X_MARGIN + 2;
+        int contentY = y + PANEL_Y_MARGIN + getTextHeight() + 2;
+
+        List<net.minecraft.world.item.ItemStack> drops = farmUIInfo.getDrops();
+        if (drops.isEmpty()) {
+            return;
+        }
+
+        int itemSize = 18; // Standard item render size (16px + 2px spacing)
+        int itemsPerRow = (width - PANEL_X_MARGIN * 2 - 4) / itemSize;
+        int row = 0;
+        int col = 0;
+
+        for (int i = 0; i < drops.size(); i++) {
+            net.minecraft.world.item.ItemStack stack = drops.get(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            int itemX = contentX + (col * itemSize);
+            int itemY = contentY + (row * itemSize);
+
+            // Render the item
+            guiGraphics.renderItem(stack, itemX, itemY);
+            guiGraphics.renderItemDecorations(this.font, stack, itemX, itemY);
+
+            col++;
+            if (col >= itemsPerRow) {
+                col = 0;
+                row++;
+            }
+        }
     }
 
     // Helper methods

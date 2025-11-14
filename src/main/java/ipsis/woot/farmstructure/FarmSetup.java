@@ -26,6 +26,8 @@ public class FarmSetup {
     private final BlockPos heartPos;
     private final List<BlockPos> controllerPositions = new ArrayList<>();
     private final List<BlockPos> cellPositions = new ArrayList<>();
+    private final List<BlockPos> importerPositions = new ArrayList<>();
+    private final List<BlockPos> exporterPositions = new ArrayList<>();
 
     // Aggregated energy storage from all cells
     private FactoryEnergyStorage aggregatedEnergy;
@@ -115,6 +117,36 @@ public class FarmSetup {
     @Nonnull
     public List<BlockPos> getCellPositions() {
         return cellPositions;
+    }
+
+    /**
+     * Add an importer position
+     */
+    public void addImporterPosition(BlockPos pos) {
+        importerPositions.add(pos);
+    }
+
+    /**
+     * Add an exporter position
+     */
+    public void addExporterPosition(BlockPos pos) {
+        exporterPositions.add(pos);
+    }
+
+    /**
+     * Get all importer positions
+     */
+    @Nonnull
+    public List<BlockPos> getImporterPositions() {
+        return importerPositions;
+    }
+
+    /**
+     * Get all exporter positions
+     */
+    @Nonnull
+    public List<BlockPos> getExporterPositions() {
+        return exporterPositions;
     }
 
     /**

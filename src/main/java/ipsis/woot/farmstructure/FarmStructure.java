@@ -171,6 +171,16 @@ public class FarmStructure implements IFarmStructure {
             setup.addControllerPosition(pos);
         }
 
+        // Add importer positions
+        for (BlockPos pos : currentFarm.getImporterPositions()) {
+            setup.addImporterPosition(pos);
+        }
+
+        // Add exporter positions
+        for (BlockPos pos : currentFarm.getExporterPositions()) {
+            setup.addExporterPosition(pos);
+        }
+
         // Add cell positions and calculate aggregated energy
         int totalCapacity = 0;
         int totalStored = 0;

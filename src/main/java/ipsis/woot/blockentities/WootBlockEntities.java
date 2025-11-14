@@ -54,4 +54,20 @@ public class WootBlockEntities {
                             Woot.LAYOUT.get()
                     ).build(null)
             );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ImporterBlockEntity>> FACTORY_IMPORTER =
+            BLOCK_ENTITIES.register("factory_importer", () ->
+                    BlockEntityType.Builder.of(
+                            ImporterBlockEntity::new,
+                            Woot.IMPORTER.get()
+                    ).build(null)
+            );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ExporterBlockEntity>> FACTORY_EXPORTER =
+            BLOCK_ENTITIES.register("factory_exporter", () ->
+                    BlockEntityType.Builder.of(
+                            ExporterBlockEntity::new,
+                            Woot.EXPORTER.get()
+                    ).build(null)
+            );
 }

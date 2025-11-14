@@ -4,9 +4,11 @@ import com.mojang.logging.LogUtils;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.blocks.AnvilBlock;
 import ipsis.woot.gui.WootMenuTypes;
+import ipsis.woot.blocks.ExporterBlock;
 import ipsis.woot.blocks.FactoryHeartBlock;
 import ipsis.woot.blocks.FactoryControllerBlock;
 import ipsis.woot.blocks.FactoryCellBlock;
+import ipsis.woot.blocks.ImporterBlock;
 import ipsis.woot.blocks.LayoutBlock;
 import ipsis.woot.config.EnderShardConfig;
 import ipsis.woot.crafting.AnvilRecipe;
@@ -79,10 +81,10 @@ public class Woot {
         new FactoryHeartBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
     public static final DeferredBlock<Block> CONTROLLER = BLOCKS.register("controller", () ->
         new FactoryControllerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
-    public static final DeferredBlock<Block> IMPORTER = BLOCKS.registerSimpleBlock("importer",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> EXPORTER = BLOCKS.registerSimpleBlock("exporter",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredBlock<Block> IMPORTER = BLOCKS.register("importer", () ->
+        new ImporterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
+    public static final DeferredBlock<Block> EXPORTER = BLOCKS.register("exporter", () ->
+        new ExporterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
 
     // ========== STRUCTURE BLOCKS (10 variants) ==========
     public static final DeferredBlock<Block> STRUCTURE_BLOCK_1 = BLOCKS.registerSimpleBlock("structure_block_1",
