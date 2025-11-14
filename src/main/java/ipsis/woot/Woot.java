@@ -48,6 +48,9 @@ public class Woot {
     public static final String MODID = "woot";
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    // Spawn ingredient recipe repository
+    public static final ipsis.woot.recipes.SpawnRecipeRepository SPAWN_RECIPE_REPOSITORY = new ipsis.woot.recipes.SpawnRecipeRepository();
+
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
@@ -325,11 +328,15 @@ public class Woot {
         // Load ender shard configuration
         EnderShardConfig.load();
 
+        // Load spawn ingredient recipes
+        ipsis.woot.recipes.IngredientLoader.loadIngredients(SPAWN_RECIPE_REPOSITORY);
+
         LOGGER.info("Woot common setup complete!");
         LOGGER.info("Registered recipe types:");
         LOGGER.info("  - Anvil Recipe Type: {}", ANVIL_RECIPE_TYPE.getId());
         LOGGER.info("  - Anvil Recipe Serializer: {}", ANVIL_RECIPE_SERIALIZER.getId());
         LOGGER.info("Ender shard configuration loaded: {} mob configs", EnderShardConfig.getConfigCount());
+        LOGGER.info("Spawn ingredient recipes loaded: {} recipes", SPAWN_RECIPE_REPOSITORY.getRecipeCount());
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {

@@ -75,11 +75,12 @@ public class PowerRecipe {
     }
 
     /**
-     * Create a default recipe for testing
+     * Create a default recipe for testing (Tier I)
+     * Matches original Woot: 320 ticks = 16 seconds at 20 ticks/second
      */
     @Nonnull
     public static PowerRecipe createDefault() {
-        return new PowerRecipe(16000, 200, 80); // 16000 RF over 200 ticks at 80 RF/tick
+        return forTier(1, 320); // Tier I: 25,600 RF over 320 ticks at 80 RF/tick
     }
 
     /**

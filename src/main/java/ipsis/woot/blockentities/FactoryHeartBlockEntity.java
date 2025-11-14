@@ -253,8 +253,27 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             return;
         }
 
-        // Generate loot from mob loot tables
         int mobCount = getMobCount();
+
+        // Get and consume spawn ingredients
+        ipsis.woot.recipes.SpawnRecipe recipe = getSpawnRecipe();
+        if (recipe != null && !recipe.isEmpty()) {
+            boolean consumed = ipsis.woot.recipes.SpawnRecipeConsumer.consume(
+                level,
+                farmSetup.getImporterPositions(),
+                recipe,
+                mobCount,
+                false // Actually consume
+            );
+
+            if (!consumed) {
+                Woot.LOGGER.warn("Failed to consume spawn ingredients, aborting spawn");
+                resetProgress();
+                return;
+            }
+        }
+
+        // Generate loot from mob loot tables
         List<ItemStack> drops = LootHelper.generateLoot(level, entityType, 0, mobCount);
         List<ItemStack> mergedDrops = LootHelper.mergeItemStacks(drops);
 
@@ -439,7 +458,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
                 if (aggregated != null) {
                     this.energyStorage = aggregated;
                 }
-                Woot.LOGGER.info("Farm setup updated: {}", farmSetup);
+
+                // Update power recipe based on tier (matches original Woot)
+                int tierLevel = farmSetup.getTier().getLevel(); // 1-4
+                this.powerRecipe = PowerRecipe.forTier(tierLevel, 320);
+                Woot.LOGGER.info("Farm setup updated: {} - Power recipe: {}", farmSetup, powerRecipe);
             }
         } else {
             farmSetup = null;
@@ -631,11 +654,42 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
     }
 
     /**
+     * Get spawn recipe for the programmed mob
+     */
+    @Nullable
+    private ipsis.woot.recipes.SpawnRecipe getSpawnRecipe() {
+        if (farmSetup == null || !farmSetup.isProgrammed()) {
+            return null;
+        }
+
+        String mobKey = farmSetup.getProgrammedMob().entityKey();
+        return Woot.SPAWN_RECIPE_REPOSITORY.get(mobKey);
+    }
+
+    /**
      * Check if missing required ingredients
      */
     public boolean hasMissingIngredients() {
-        // Will be implemented in Phase 3 (farming logic)
-        return false;
+        if (farmSetup == null || !farmSetup.isProgrammed()) {
+            return false;
+        }
+
+        if (level == null || level.isClientSide()) {
+            return false;
+        }
+
+        ipsis.woot.recipes.SpawnRecipe recipe = getSpawnRecipe();
+        if (recipe == null || recipe.isEmpty()) {
+            return false; // No ingredients required
+        }
+
+        // Check if ingredients are available
+        return !ipsis.woot.recipes.SpawnRecipeConsumer.hasIngredients(
+            level,
+            farmSetup.getImporterPositions(),
+            recipe,
+            getMobCount()
+        );
     }
 
     /**

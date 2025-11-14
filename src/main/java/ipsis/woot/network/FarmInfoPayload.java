@@ -40,6 +40,7 @@ public record FarmInfoPayload(
     List<ItemStack> ingredientsItems,
     List<FluidStack> ingredientsFluids,
     List<ItemStack> drops,
+    int totalSamples,
     boolean isValid
 ) implements CustomPacketPayload {
 
@@ -101,6 +102,7 @@ public record FarmInfoPayload(
             ItemStack.LIST_STREAM_CODEC.encode(buffer, payload.ingredientsItems);
             FLUID_STACK_LIST_CODEC.encode(buffer, payload.ingredientsFluids);
             ItemStack.LIST_STREAM_CODEC.encode(buffer, payload.drops);
+            ByteBufCodecs.VAR_INT.encode(buffer, payload.totalSamples);
             ByteBufCodecs.BOOL.encode(buffer, payload.isValid);
         }
 
@@ -122,6 +124,7 @@ public record FarmInfoPayload(
                 ItemStack.LIST_STREAM_CODEC.decode(buffer),
                 FLUID_STACK_LIST_CODEC.decode(buffer),
                 ItemStack.LIST_STREAM_CODEC.decode(buffer),
+                ByteBufCodecs.VAR_INT.decode(buffer),
                 ByteBufCodecs.BOOL.decode(buffer)
             );
         }
@@ -149,6 +152,7 @@ public record FarmInfoPayload(
         info.setMissingIngredients(missingIngredients);
         info.setPowerStored(powerStored);
         info.setPowerCapacity(powerCapacity);
+        info.setTotalSamples(totalSamples);
         info.setValid(isValid);
 
         ingredientsItems.forEach(info::addIngredientItem);
@@ -178,6 +182,7 @@ public record FarmInfoPayload(
             new ArrayList<>(info.getIngredientsItems()),
             new ArrayList<>(info.getIngredientsFluids()),
             new ArrayList<>(info.getDrops()),
+            info.getTotalSamples(),
             info.isValid()
         );
     }

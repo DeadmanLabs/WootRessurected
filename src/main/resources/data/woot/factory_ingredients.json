@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "default": {
+    "efficiency": true,
+    "items": [],
+    "fluids": []
+  },
+  "ingredients": [
+    {
+      "mobName": "minecraft:wither",
+      "efficiency": true,
+      "items": [
+        {
+          "item": "minecraft:soul_sand",
+          "count": 4
+        },
+        {
+          "item": "minecraft:wither_skeleton_skull",
+          "count": 3
+        }
+      ],
+      "fluids": []
+    },
+    {
+      "mobName": "minecraft:ender_dragon",
+      "efficiency": true,
+      "items": [
+        {
+          "item": "minecraft:end_crystal",
+          "count": 4
+        }
+      ],
+      "fluids": []
+    }
+  ]
+}

@@ -98,6 +98,15 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
     }
 
     @Override
+    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // Render background and all GUI elements first
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        // Render tooltips AFTER everything else (critical for proper display)
+        renderDropTooltips(guiGraphics, mouseX, mouseY);
+    }
+
+    @Override
     protected void renderBg(@Nonnull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -163,25 +172,34 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
         // Drops Panel
         int dropsHeight = HEIGHT - (GUI_Y_MARGIN * 2) - RECIPE_HEIGHT - (PROGRESS_HEIGHT * 2) - INGREDIENT_HEIGHT - (PANEL_MARGIN * 4);
         renderDropsPanel(guiGraphics, GUI_X_MARGIN, yOffset, panelWidth, dropsHeight);
-
-        // Render tooltips for items (must be last)
-        renderDropTooltips(guiGraphics, mouseX, mouseY, GUI_X_MARGIN, yOffset, panelWidth, dropsHeight);
     }
 
     /**
      * Render tooltips for drop items when hovering
+     * Called from render() method with screen-absolute mouse coordinates
      */
-    private void renderDropTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int width, int height) {
-        int contentX = x + PANEL_X_MARGIN + 2;
-        int contentY = y + PANEL_Y_MARGIN + getTextHeight() + 2;
-
+    private void renderDropTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         List<net.minecraft.world.item.ItemStack> drops = farmUIInfo.getDrops();
         if (drops.isEmpty()) {
             return;
         }
 
+        // Calculate drops panel position (same as in renderLabels)
+        int panelWidth = WIDTH - (GUI_X_MARGIN * 2);
+        int yOffset = GUI_Y_MARGIN + RECIPE_HEIGHT + PANEL_MARGIN + PROGRESS_HEIGHT + PANEL_MARGIN +
+                      PROGRESS_HEIGHT + PANEL_MARGIN + INGREDIENT_HEIGHT + PANEL_MARGIN;
+        int dropsHeight = HEIGHT - (GUI_Y_MARGIN * 2) - RECIPE_HEIGHT - (PROGRESS_HEIGHT * 2) - INGREDIENT_HEIGHT - (PANEL_MARGIN * 4);
+
+        // Calculate content area (GUI-relative)
+        int guiRelativeX = GUI_X_MARGIN + PANEL_X_MARGIN + 2;
+        int guiRelativeY = yOffset + PANEL_Y_MARGIN + getTextHeight() + 2;
+
+        // Convert to screen-absolute coordinates
+        int contentX = leftPos + guiRelativeX;
+        int contentY = topPos + guiRelativeY;
+
         int itemSize = 18;
-        int itemsPerRow = (width - PANEL_X_MARGIN * 2 - 4) / itemSize;
+        int itemsPerRow = (panelWidth - PANEL_X_MARGIN * 2 - 4) / itemSize;
         int totalSamples = farmUIInfo.getTotalSamples(); // Cumulative total
         int row = 0;
         int col = 0;
@@ -195,30 +213,15 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
             int itemX = contentX + (col * itemSize);
             int itemY = contentY + (row * itemSize);
 
-            // Check if mouse is hovering over this item
+            // Check if mouse is hovering over this item (screen-absolute comparison)
             if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
-                // Calculate drop chance from cumulative statistics
-                // The stack.getCount() represents average drops per mob
-                // For drop chance, we estimate based on average (simplified calculation)
-                float dropChance;
-                if (totalSamples > 0) {
-                    // Simplified: if average is 1.5 items per mob, we assume ~100% drop rate
-                    // This is an approximation - the original Woot tracks individual drop events
-                    dropChance = Math.min(100.0f, (stack.getCount() * 100.0f));
-                } else {
-                    dropChance = 0.0f;
-                }
-                String chanceText = String.format("%.1f%%", dropChance);
-
                 // Create tooltip components
                 List<Component> tooltip = new ArrayList<>();
                 tooltip.add(stack.getHoverName());
-                if (totalSamples > 0) {
-                    tooltip.add(Component.literal("Average: " + stack.getCount() + " per mob").withStyle(net.minecraft.ChatFormatting.GRAY));
-                    tooltip.add(Component.literal("Learned from " + totalSamples + " mobs").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
-                } else {
-                    tooltip.add(Component.literal("Learning...").withStyle(net.minecraft.ChatFormatting.GRAY));
-                }
+
+                // Show statistics
+                tooltip.add(Component.literal("Average: " + stack.getCount() + " per mob").withStyle(net.minecraft.ChatFormatting.GRAY));
+                tooltip.add(Component.literal("Learned from " + totalSamples + " mob" + (totalSamples == 1 ? "" : "s")).withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
 
                 // Render tooltip
                 guiGraphics.renderTooltip(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
