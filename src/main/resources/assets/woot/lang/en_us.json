@@ -69,6 +69,8 @@
   "block.woot.upgrade_bm_le_tank": "Blood Magic LE Tank Upgrade",
   "block.woot.upgrade_ec_blood": "Extra Cells Blood Upgrade",
 
+  "container.woot.factory_heart": "Factory Heart",
+
   "chat.woot.anvil.nomagma": "Anvil is not hot - place a magma block below it",
   "chat.woot.anvil.nobase": "No base item on anvil",
   "chat.woot.anvil.invalid": "Invalid recipe - check items and ingredients",

@@ -6,6 +6,8 @@ import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.util.WootBlockNotifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -13,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,6 +58,20 @@ public class FactoryHeartBlock extends BaseEntityBlock {
     @Nonnull
     public RenderShape getRenderShape(@Nonnull BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    @Nonnull
+    @SuppressWarnings("deprecation")
+    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+                                               @Nonnull Player player, @Nonnull BlockHitResult hitResult) {
+        if (!level.isClientSide()) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof FactoryHeartBlockEntity heart) {
+                player.openMenu(heart, pos);
+            }
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
     @Override

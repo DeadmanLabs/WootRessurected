@@ -3,6 +3,7 @@ package ipsis.woot;
 import com.mojang.logging.LogUtils;
 import ipsis.woot.blockentities.WootBlockEntities;
 import ipsis.woot.blocks.AnvilBlock;
+import ipsis.woot.gui.WootMenuTypes;
 import ipsis.woot.blocks.FactoryHeartBlock;
 import ipsis.woot.blocks.FactoryControllerBlock;
 import ipsis.woot.blocks.FactoryCellBlock;
@@ -31,6 +32,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -298,11 +301,13 @@ public class Woot {
 
     public Woot(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerCapabilities);
 
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         WootBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        WootMenuTypes.MENU_TYPES.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
         WootDataComponents.DATA_COMPONENTS.register(modEventBus);
@@ -321,5 +326,41 @@ public class Woot {
         LOGGER.info("  - Anvil Recipe Type: {}", ANVIL_RECIPE_TYPE.getId());
         LOGGER.info("  - Anvil Recipe Serializer: {}", ANVIL_RECIPE_SERIALIZER.getId());
         LOGGER.info("Ender shard configuration loaded: {} mob configs", EnderShardConfig.getConfigCount());
+    }
+
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        LOGGER.info("Registering energy capabilities...");
+
+        // Register energy capability for Factory Cell
+        // Only exposed when multiblock is formed
+        event.registerBlockEntity(
+            Capabilities.EnergyStorage.BLOCK,
+            WootBlockEntities.FACTORY_CELL.get(),
+            (blockEntity, direction) -> {
+                // Conditional capability: only when part of formed multiblock
+                if (blockEntity.isFormed()) {
+                    return blockEntity.getEnergyStorage();
+                }
+                // Return null when not formed - no capability exposed
+                return null;
+            }
+        );
+
+        // Register energy capability for Factory Heart
+        // Only exposed when multiblock is formed
+        event.registerBlockEntity(
+            Capabilities.EnergyStorage.BLOCK,
+            WootBlockEntities.FACTORY_HEART.get(),
+            (blockEntity, direction) -> {
+                // Conditional capability: only when multiblock is formed
+                if (blockEntity.isFormed()) {
+                    return blockEntity.getEnergyStorage();
+                }
+                // Return null when not formed - no capability exposed
+                return null;
+            }
+        );
+
+        LOGGER.info("Energy capabilities registered for Factory Cell and Heart");
     }
 }
