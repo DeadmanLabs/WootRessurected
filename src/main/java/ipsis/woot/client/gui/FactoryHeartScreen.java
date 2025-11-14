@@ -182,7 +182,7 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
 
         int itemSize = 18;
         int itemsPerRow = (width - PANEL_X_MARGIN * 2 - 4) / itemSize;
-        int mobCount = menu.getMobCount();
+        int totalSamples = farmUIInfo.getTotalSamples(); // Cumulative total
         int row = 0;
         int col = 0;
 
@@ -197,15 +197,28 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
 
             // Check if mouse is hovering over this item
             if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
-                // Calculate approximate drop chance
-                float dropChance = (stack.getCount() / (float) mobCount) * 100.0f;
+                // Calculate drop chance from cumulative statistics
+                // The stack.getCount() represents average drops per mob
+                // For drop chance, we estimate based on average (simplified calculation)
+                float dropChance;
+                if (totalSamples > 0) {
+                    // Simplified: if average is 1.5 items per mob, we assume ~100% drop rate
+                    // This is an approximation - the original Woot tracks individual drop events
+                    dropChance = Math.min(100.0f, (stack.getCount() * 100.0f));
+                } else {
+                    dropChance = 0.0f;
+                }
                 String chanceText = String.format("%.1f%%", dropChance);
 
                 // Create tooltip components
                 List<Component> tooltip = new ArrayList<>();
                 tooltip.add(stack.getHoverName());
-                tooltip.add(Component.literal("Drop Chance: " + chanceText).withStyle(net.minecraft.ChatFormatting.GRAY));
-                tooltip.add(Component.literal("Average: " + stack.getCount() + " per " + mobCount + " mobs").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+                if (totalSamples > 0) {
+                    tooltip.add(Component.literal("Average: " + stack.getCount() + " per mob").withStyle(net.minecraft.ChatFormatting.GRAY));
+                    tooltip.add(Component.literal("Learned from " + totalSamples + " mobs").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+                } else {
+                    tooltip.add(Component.literal("Learning...").withStyle(net.minecraft.ChatFormatting.GRAY));
+                }
 
                 // Render tooltip
                 guiGraphics.renderTooltip(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);

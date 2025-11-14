@@ -64,7 +64,7 @@ public class FactoryCellBlockEntity extends BlockEntity implements IFactoryGlueP
     private FactoryEnergyStorage createEnergyStorage(int tier) {
         int capacity = getCapacityForTier(tier);
         int maxTransfer = Math.min(10000, capacity / 10); // 10% of capacity or 10K RF/t
-        return new FactoryEnergyStorage(capacity, maxTransfer, 0); // Can receive, not extract
+        return new FactoryEnergyStorage(capacity, maxTransfer, maxTransfer); // Can receive and extract
     }
 
     /**

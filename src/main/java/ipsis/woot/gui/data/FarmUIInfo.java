@@ -38,6 +38,9 @@ public class FarmUIInfo {
     private final List<FluidStack> ingredientsFluids = new ArrayList<>();
     private final List<ItemStack> drops = new ArrayList<>();
 
+    // Drop learning statistics
+    private int totalSamples = 0; // Total mobs spawned (for drop chance calculation)
+
     // Upgrades (stubbed for future implementation)
     private final UpgradeUIInfo upgradeUIInfo = new UpgradeUIInfo();
 
@@ -59,6 +62,7 @@ public class FarmUIInfo {
     public List<ItemStack> getIngredientsItems() { return ingredientsItems; }
     public List<FluidStack> getIngredientsFluids() { return ingredientsFluids; }
     public List<ItemStack> getDrops() { return drops; }
+    public int getTotalSamples() { return totalSamples; }
     public UpgradeUIInfo getUpgradeUIInfo() { return upgradeUIInfo; }
     public boolean isValid() { return isValid; }
 
@@ -74,6 +78,7 @@ public class FarmUIInfo {
     public void setMissingIngredients(boolean missingIngredients) { this.missingIngredients = missingIngredients; }
     public void setPowerStored(int powerStored) { this.powerStored = powerStored; }
     public void setPowerCapacity(int powerCapacity) { this.powerCapacity = powerCapacity; }
+    public void setTotalSamples(int totalSamples) { this.totalSamples = totalSamples; }
     public void setValid(boolean valid) { isValid = valid; }
 
     // Helper methods

@@ -33,7 +33,9 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Factory Heart Block Entity - Main Controller
@@ -60,8 +62,12 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
     private int tickCounter = 0;
     private boolean isRunning = false;
 
-    // Drop tracking for GUI
+    // Drop tracking for GUI (last spawn cycle)
     private List<ItemStack> lastDrops = new ArrayList<>();
+
+    // Drop learning system (cumulative statistics)
+    private int totalSamples = 0; // Total mobs spawned
+    private Map<String, Integer> dropStatistics = new HashMap<>(); // Item registry name -> count
 
     public FactoryHeartBlockEntity(BlockPos pos, BlockState state) {
         super(WootBlockEntities.FACTORY_HEART.get(), pos, state);
@@ -255,8 +261,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops",
             farmSetup.getProgrammedMob().displayName(), mobCount, mergedDrops.size());
 
-        // Store drops for GUI display
-        lastDrops = new ArrayList<>(mergedDrops);
+        // Record drops to learning system (cumulative statistics)
+        recordDrops(mergedDrops, mobCount);
+
+        // Update GUI display to show cumulative averages
+        lastDrops = calculateDropsWithPercentages();
 
         // Output drops to exporters
         outputDrops(mergedDrops);
@@ -302,6 +311,88 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         }
 
         setChanged();
+    }
+
+    /**
+     * Record drops to the learning system
+     * Tracks cumulative statistics for drop chance calculation
+     */
+    private void recordDrops(List<ItemStack> drops, int mobCount) {
+        // Increment total samples by the number of mobs spawned
+        totalSamples += mobCount;
+
+        // Record each item drop
+        for (ItemStack drop : drops) {
+            if (drop.isEmpty()) {
+                continue;
+            }
+
+            // Use item registry name as key for tracking
+            String itemKey = BuiltInRegistries.ITEM.getKey(drop.getItem()).toString();
+
+            // Increment drop count
+            int currentCount = dropStatistics.getOrDefault(itemKey, 0);
+            dropStatistics.put(itemKey, currentCount + drop.getCount());
+        }
+
+        setChanged();
+    }
+
+    /**
+     * Calculate drop percentages based on cumulative statistics
+     * Returns a list of ItemStacks with their calculated drop chances
+     */
+    private List<ItemStack> calculateDropsWithPercentages() {
+        List<ItemStack> result = new ArrayList<>();
+
+        if (totalSamples == 0) {
+            return result;
+        }
+
+        // Convert drop statistics to ItemStacks with averaged counts
+        for (Map.Entry<String, Integer> entry : dropStatistics.entrySet()) {
+            String itemKey = entry.getKey();
+            int totalDropped = entry.getValue();
+
+            // Get the item from registry
+            ResourceLocation itemId = ResourceLocation.parse(itemKey);
+            var item = BuiltInRegistries.ITEM.get(itemId);
+            if (item == null) {
+                continue;
+            }
+
+            // Calculate average drop per sample (mob)
+            // This represents the expected average drop amount
+            int averageCount = Math.max(1, totalDropped / totalSamples);
+
+            ItemStack stack = new ItemStack(item, averageCount);
+            result.add(stack);
+        }
+
+        return result;
+    }
+
+    /**
+     * Get drop chance percentage for a specific item
+     * Used by GUI for tooltip display
+     */
+    public float getDropChance(ItemStack itemStack) {
+        if (totalSamples == 0 || itemStack.isEmpty()) {
+            return 0.0f;
+        }
+
+        String itemKey = BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString();
+        int totalDropped = dropStatistics.getOrDefault(itemKey, 0);
+
+        if (totalDropped == 0) {
+            return 0.0f;
+        }
+
+        // Calculate how many times this item appeared (regardless of stack size)
+        // For simplicity, we'll approximate: if we got 60 gunpowder total from 100 creepers,
+        // we'll say it dropped ~60% of the time (this is an approximation)
+        float dropChance = Math.min(100.0f, (totalDropped / (float) totalSamples) * 100.0f);
+        return Math.max(1.0f, dropChance); // Minimum 1%
     }
 
     /**
@@ -441,6 +532,15 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
         tag.putInt("Energy", energyStorage.getEnergyStored());
         tag.putLong("ConsumedPower", consumedPower);
+
+        // Save learning system statistics
+        tag.putInt("TotalSamples", totalSamples);
+
+        CompoundTag statsTag = new CompoundTag();
+        for (Map.Entry<String, Integer> entry : dropStatistics.entrySet()) {
+            statsTag.putInt(entry.getKey(), entry.getValue());
+        }
+        tag.put("DropStatistics", statsTag);
     }
 
     @Override
@@ -452,6 +552,21 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         }
         if (tag.contains("ConsumedPower")) {
             consumedPower = tag.getLong("ConsumedPower");
+        }
+
+        // Load learning system statistics
+        if (tag.contains("TotalSamples")) {
+            totalSamples = tag.getInt("TotalSamples");
+        }
+
+        if (tag.contains("DropStatistics")) {
+            dropStatistics.clear();
+            CompoundTag statsTag = tag.getCompound("DropStatistics");
+            for (String key : statsTag.getAllKeys()) {
+                dropStatistics.put(key, statsTag.getInt(key));
+            }
+            // Update GUI display with loaded statistics
+            lastDrops = calculateDropsWithPercentages();
         }
     }
 
@@ -574,10 +689,13 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
                 info.setMobName(Component.literal("Not Programmed"));
             }
 
-            // Add drop information (show last generated drops)
+            // Add drop information (show cumulative learned drops)
             for (ItemStack drop : lastDrops) {
                 info.addDrop(drop.copy());
             }
+
+            // Add total samples for drop chance calculation
+            info.setTotalSamples(totalSamples);
         } else {
             info.setTier(ipsis.woot.multiblock.EnumMobFactoryTier.TIER_I);
             info.setMobName(Component.literal("No Structure"));

@@ -333,7 +333,7 @@ public class Woot {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        LOGGER.info("Registering energy capabilities...");
+        LOGGER.info("Registering capabilities...");
 
         // Register energy capability for Factory Cell
         // Always exposed so tools like Jade can see it
@@ -358,6 +358,22 @@ public class Woot {
             }
         );
 
-        LOGGER.info("Energy capabilities registered for Factory Cell and Heart");
+        // Register item handler capability for Factory Exporter
+        // Always exposed to allow extraction of items
+        event.registerBlockEntity(
+            Capabilities.ItemHandler.BLOCK,
+            WootBlockEntities.FACTORY_EXPORTER.get(),
+            (blockEntity, direction) -> blockEntity.getItemHandler()
+        );
+
+        // Register item handler capability for Factory Importer
+        // Always exposed to allow insertion of items
+        event.registerBlockEntity(
+            Capabilities.ItemHandler.BLOCK,
+            WootBlockEntities.FACTORY_IMPORTER.get(),
+            (blockEntity, direction) -> blockEntity.getItemHandler()
+        );
+
+        LOGGER.info("Capabilities registered: Energy (Cell, Heart), ItemHandler (Exporter, Importer)");
     }
 }

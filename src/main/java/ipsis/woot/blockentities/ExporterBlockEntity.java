@@ -10,6 +10,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nonnull;
 
@@ -21,9 +23,18 @@ public class ExporterBlockEntity extends BlockEntity implements Container {
 
     private static final int INVENTORY_SIZE = 27; // 3 rows of 9 slots
     private NonNullList<ItemStack> inventory = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
+    private final IItemHandler itemHandler = new InvWrapper(this);
 
     public ExporterBlockEntity(BlockPos pos, BlockState state) {
         super(WootBlockEntities.FACTORY_EXPORTER.get(), pos, state);
+    }
+
+    /**
+     * Get the item handler for external access (pipes, hoppers, etc.)
+     */
+    @Nonnull
+    public IItemHandler getItemHandler() {
+        return itemHandler;
     }
 
     @Override
