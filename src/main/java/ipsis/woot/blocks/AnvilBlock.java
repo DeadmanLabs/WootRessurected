@@ -98,21 +98,29 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
             return ItemInteractionResult.SUCCESS;
         }
 
+        ipsis.woot.Woot.LOGGER.info("[SERVER] AnvilBlock.useItemOn called - Hand: {}, Item: {}, Player: {}",
+            hand, stack.getItem(), player.getName().getString());
+
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (!(blockEntity instanceof AnvilBlockEntity anvilBE)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
+        ipsis.woot.Woot.LOGGER.info("[SERVER] Current base item on anvil: {}", anvilBE.getBaseItem());
+
         // Check if player is holding the YahHammer
         ItemStack heldItem = player.getItemInHand(hand);
         if (heldItem.is(ipsis.woot.Woot.YAH_HAMMER.get())) {
+            ipsis.woot.Woot.LOGGER.info("[SERVER] YahHammer detected in {} hand, calling tryCraft()", hand);
             // Try to perform anvil crafting
             tryCraft(level, pos, player, anvilBE);
+            ipsis.woot.Woot.LOGGER.info("[SERVER] tryCraft() completed, base item is now: {}", anvilBE.getBaseItem());
             return ItemInteractionResult.SUCCESS;
         }
 
         // If holding an item and anvil is empty, place the item as base
         if (!heldItem.isEmpty() && !anvilBE.hasBaseItem()) {
+            ipsis.woot.Woot.LOGGER.info("[SERVER] Placing item {} on anvil from {} hand", heldItem.getItem(), hand);
             ItemStack baseItem = heldItem.copy();
             baseItem.setCount(1);
             anvilBE.setBaseItem(baseItem);
@@ -121,6 +129,7 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
                 heldItem.shrink(1);
             } else {
                 // In creative mode, clear the hand to allow immediate retrieval
+                ipsis.woot.Woot.LOGGER.info("[SERVER] Creative mode: clearing {} hand after placing item", hand);
                 player.setItemInHand(hand, ItemStack.EMPTY);
             }
 
@@ -206,9 +215,22 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
             return;
         }
 
+        ipsis.woot.Woot.LOGGER.info("Anvil crafting succeeded! Output: {}, PreserveBase: {}, BaseItem before: {}",
+            output.getItem(), recipe.shouldPreserveBase(), anvilBE.getBaseItem());
+
         // Clear base item if not preserved
         if (!recipe.shouldPreserveBase()) {
+            ItemStack consumedBase = anvilBE.getBaseItem().copy();
+            ipsis.woot.Woot.LOGGER.info("Calling clearBaseItem() because preserve_base is false");
             anvilBE.clearBaseItem();
+            ipsis.woot.Woot.LOGGER.info("BaseItem after clearBaseItem(): {}", anvilBE.getBaseItem());
+
+            // Notify player that base item was consumed
+            player.displayClientMessage(
+                Component.literal("Consumed: ").append(consumedBase.getHoverName())
+                    .withStyle(net.minecraft.ChatFormatting.YELLOW),
+                true
+            );
         }
 
         // Consume ingredients

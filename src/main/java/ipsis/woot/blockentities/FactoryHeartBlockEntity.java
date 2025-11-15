@@ -761,12 +761,6 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
         ipsis.woot.multiblock.EnumMobFactoryTier factoryTier = farmSetup.getTier();
         boolean sufficient = factoryTier.getLevel() >= requiredTier.getLevel();
-
-        if (!sufficient) {
-            Woot.LOGGER.debug("Factory tier {} insufficient for mob requiring tier {}",
-                factoryTier, requiredTier);
-        }
-
         return sufficient;
     }
 
