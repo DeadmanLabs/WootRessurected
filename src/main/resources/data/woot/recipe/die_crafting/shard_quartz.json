@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:vanilla_die_crafting"
+    }
+  ],
+  "pattern": [
+    "HD ",
+    " G ",
+    "   "
+  ],
+  "key": {
+    "H": {
+      "item": "woot:yahhammer"
+    },
+    "D": {
+      "item": "woot:die_shard"
+    },
+    "G": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "result": {
+    "id": "woot:shard_quartz",
+    "count": 3
+  }
+}

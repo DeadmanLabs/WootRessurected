@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:soul_sand"
+    },
+    {
+      "item": "woot:yahhammer"
+    }
+  ],
+  "result": {
+    "id": "woot:soulsanddust"
+  }
+}

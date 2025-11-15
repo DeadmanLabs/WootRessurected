@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:shard_recipe"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:shard_tier_iv"
+    }
+  ],
+  "result": {
+    "id": "woot:structure_block_4_alt"
+  }
+}

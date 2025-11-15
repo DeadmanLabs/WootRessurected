@@ -68,6 +68,7 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
     // Drop learning system (cumulative statistics)
     private int totalSamples = 0; // Total mobs spawned
     private Map<String, Integer> dropStatistics = new HashMap<>(); // Item registry name -> count
+    private String lastProgrammedMobKey = null; // Track mob changes to reset statistics
 
     public FactoryHeartBlockEntity(BlockPos pos, BlockState state) {
         super(WootBlockEntities.FACTORY_HEART.get(), pos, state);
@@ -178,6 +179,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             return false;
         }
 
+        // Check if factory tier is sufficient for the programmed mob
+        if (!isTierSufficient()) {
+            return false;  // Tier too low - cannot process
+        }
+
         // Check if we have stored energy available
         return energyStorage.getEnergyStored() > 0;
     }
@@ -257,6 +263,8 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
         // Get and consume spawn ingredients
         ipsis.woot.recipes.SpawnRecipe recipe = getSpawnRecipe();
+        Woot.LOGGER.info("Spawn recipe for {}: {}", entityType, recipe != null ? recipe.toString() : "null");
+
         if (recipe != null && !recipe.isEmpty()) {
             boolean consumed = ipsis.woot.recipes.SpawnRecipeConsumer.consume(
                 level,
@@ -273,12 +281,31 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             }
         }
 
-        // Generate loot from mob loot tables
-        List<ItemStack> drops = LootHelper.generateLoot(level, entityType, 0, mobCount);
+        // Generate drops - use configured drops if available, otherwise use loot table
+        List<ItemStack> drops;
+        if (recipe != null && recipe.hasConfiguredDrops()) {
+            // Use configured drops (for bosses like Wither, Ender Dragon)
+            drops = new ArrayList<>();
+            for (ItemStack configuredDrop : recipe.getDrops()) {
+                ItemStack scaledDrop = configuredDrop.copy();
+                scaledDrop.setCount(configuredDrop.getCount() * mobCount);
+                drops.add(scaledDrop);
+                Woot.LOGGER.info("Configured drop: {} x {}", scaledDrop.getItem(), scaledDrop.getCount());
+            }
+            Woot.LOGGER.info("Using configured drops for {}: {} items", entityType, drops.size());
+        } else {
+            // Generate loot from mob loot tables (standard mobs)
+            drops = LootHelper.generateLoot(level, entityType, 0, mobCount);
+            Woot.LOGGER.info("Generated loot table drops for {}: {} items", entityType, drops.size());
+        }
         List<ItemStack> mergedDrops = LootHelper.mergeItemStacks(drops);
 
-        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops",
-            farmSetup.getProgrammedMob().displayName(), mobCount, mergedDrops.size());
+        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops, merged to {} stacks",
+            farmSetup.getProgrammedMob().displayName(), mobCount, drops.size(), mergedDrops.size());
+
+        for (ItemStack drop : mergedDrops) {
+            Woot.LOGGER.info("  - {} x {}", drop.getItem(), drop.getCount());
+        }
 
         // Record drops to learning system (cumulative statistics)
         recordDrops(mergedDrops, mobCount);
@@ -462,6 +489,20 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
                 // Update power recipe based on tier (matches original Woot)
                 int tierLevel = farmSetup.getTier().getLevel(); // 1-4
                 this.powerRecipe = PowerRecipe.forTier(tierLevel, 320);
+
+                // Check if programmed mob changed - reset drop statistics if so
+                String currentMobKey = farmSetup.isProgrammed() ? farmSetup.getProgrammedMob().entityKey() : null;
+                if (currentMobKey != null && !currentMobKey.equals(lastProgrammedMobKey)) {
+                    // Mob changed - reset drop learning statistics
+                    totalSamples = 0;
+                    dropStatistics.clear();
+                    lastDrops.clear();
+                    lastProgrammedMobKey = currentMobKey;
+                    Woot.LOGGER.info("Programmed mob changed to {}, reset drop statistics", currentMobKey);
+                } else if (currentMobKey == null) {
+                    lastProgrammedMobKey = null;
+                }
+
                 Woot.LOGGER.info("Farm setup updated: {} - Power recipe: {}", farmSetup, powerRecipe);
             }
         } else {
@@ -564,6 +605,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             statsTag.putInt(entry.getKey(), entry.getValue());
         }
         tag.put("DropStatistics", statsTag);
+
+        // Save last programmed mob key for detecting changes
+        if (lastProgrammedMobKey != null) {
+            tag.putString("LastProgrammedMob", lastProgrammedMobKey);
+        }
     }
 
     @Override
@@ -590,6 +636,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             }
             // Update GUI display with loaded statistics
             lastDrops = calculateDropsWithPercentages();
+        }
+
+        // Load last programmed mob key
+        if (tag.contains("LastProgrammedMob")) {
+            lastProgrammedMobKey = tag.getString("LastProgrammedMob");
         }
     }
 
@@ -667,7 +718,60 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
     }
 
     /**
-     * Check if missing required ingredients
+     * Get the required factory tier for the currently programmed mob
+     * @return Required tier, or null if not programmed
+     */
+    @Nullable
+    private ipsis.woot.multiblock.EnumMobFactoryTier getRequiredMobTier() {
+        if (farmSetup == null || !farmSetup.isProgrammed()) {
+            return null;
+        }
+
+        // Check if recipe has explicit tier override
+        ipsis.woot.recipes.SpawnRecipe recipe = getSpawnRecipe();
+        if (recipe != null && recipe.hasTierOverride()) {
+            return recipe.getRequiredTier();
+        }
+
+        // Calculate tier from mob health
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            EntityType<?> entityType = getEntityType();
+            if (entityType != null) {
+                return ipsis.woot.util.MobTierCalculator.calculateTier(serverLevel, entityType);
+            }
+        }
+
+        // Default to Tier 2 for unknown/modded mobs
+        return ipsis.woot.multiblock.EnumMobFactoryTier.TIER_II;
+    }
+
+    /**
+     * Check if factory tier is sufficient for the programmed mob
+     * @return true if factory tier >= required mob tier
+     */
+    public boolean isTierSufficient() {
+        if (farmSetup == null || !farmSetup.isProgrammed()) {
+            return true; // No mob = no restriction
+        }
+
+        ipsis.woot.multiblock.EnumMobFactoryTier requiredTier = getRequiredMobTier();
+        if (requiredTier == null) {
+            return true; // No tier requirement
+        }
+
+        ipsis.woot.multiblock.EnumMobFactoryTier factoryTier = farmSetup.getTier();
+        boolean sufficient = factoryTier.getLevel() >= requiredTier.getLevel();
+
+        if (!sufficient) {
+            Woot.LOGGER.debug("Factory tier {} insufficient for mob requiring tier {}",
+                factoryTier, requiredTier);
+        }
+
+        return sufficient;
+    }
+
+    /**
+     * Check if missing required ingredients or tier too low
      */
     public boolean hasMissingIngredients() {
         if (farmSetup == null || !farmSetup.isProgrammed()) {
@@ -676,6 +780,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
         if (level == null || level.isClientSide()) {
             return false;
+        }
+
+        // Check tier requirement
+        if (!isTierSufficient()) {
+            return true; // Tier too low counts as "missing ingredients"
         }
 
         ipsis.woot.recipes.SpawnRecipe recipe = getSpawnRecipe();
@@ -739,6 +848,12 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             if (farmSetup.getProgrammedMob() != null) {
                 // EnderShardData is a record, use displayName() accessor
                 info.setMobName(Component.literal(farmSetup.getProgrammedMob().displayName()));
+
+                // Set required tier for this mob
+                ipsis.woot.multiblock.EnumMobFactoryTier requiredTier = getRequiredMobTier();
+                if (requiredTier != null) {
+                    info.setMobRequiredTier(requiredTier);
+                }
             } else {
                 info.setMobName(Component.literal("Not Programmed"));
             }
@@ -750,6 +865,23 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
             // Add total samples for drop chance calculation
             info.setTotalSamples(totalSamples);
+
+            // Add spawn ingredient requirements
+            ipsis.woot.recipes.SpawnRecipe spawnRecipe = getSpawnRecipe();
+            if (spawnRecipe != null && !spawnRecipe.isEmpty()) {
+                int mobCount = getMobCount();
+                // Scale ingredients by mob count
+                for (ItemStack item : spawnRecipe.getItems()) {
+                    ItemStack scaled = item.copy();
+                    scaled.setCount(item.getCount() * mobCount);
+                    info.addIngredientItem(scaled);
+                }
+                for (net.neoforged.neoforge.fluids.FluidStack fluid : spawnRecipe.getFluids()) {
+                    net.neoforged.neoforge.fluids.FluidStack scaled = fluid.copy();
+                    scaled.setAmount(fluid.getAmount() * mobCount);
+                    info.addIngredientFluid(scaled);
+                }
+            }
         } else {
             info.setTier(ipsis.woot.multiblock.EnumMobFactoryTier.TIER_I);
             info.setMobName(Component.literal("No Structure"));

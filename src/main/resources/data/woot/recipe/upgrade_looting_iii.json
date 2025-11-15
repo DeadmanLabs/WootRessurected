@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "woot:factorybase"
+    },
+    {
+      "item": "woot:factorycore_t3_upgrade"
+    },
+    {
+      "item": "minecraft:enchanted_book"
+    }
+  ],
+  "result": {
+    "id": "woot:upgrade_looting_iii"
+  }
+}

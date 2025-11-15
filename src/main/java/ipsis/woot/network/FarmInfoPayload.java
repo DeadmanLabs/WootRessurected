@@ -27,6 +27,7 @@ import static ipsis.woot.Woot.MODID;
 public record FarmInfoPayload(
     BlockPos pos,
     EnumMobFactoryTier tier,
+    EnumMobFactoryTier mobRequiredTier,
     Component mobName,
     int mobCount,
     long recipeTotalPower,
@@ -89,6 +90,7 @@ public record FarmInfoPayload(
         public void encode(RegistryFriendlyByteBuf buffer, FarmInfoPayload payload) {
             BlockPos.STREAM_CODEC.encode(buffer, payload.pos);
             TIER_CODEC.encode(buffer, payload.tier);
+            TIER_CODEC.encode(buffer, payload.mobRequiredTier);
             ComponentSerialization.STREAM_CODEC.encode(buffer, payload.mobName);
             ByteBufCodecs.VAR_INT.encode(buffer, payload.mobCount);
             ByteBufCodecs.VAR_LONG.encode(buffer, payload.recipeTotalPower);
@@ -110,6 +112,7 @@ public record FarmInfoPayload(
         public FarmInfoPayload decode(RegistryFriendlyByteBuf buffer) {
             return new FarmInfoPayload(
                 BlockPos.STREAM_CODEC.decode(buffer),
+                TIER_CODEC.decode(buffer),
                 TIER_CODEC.decode(buffer),
                 ComponentSerialization.STREAM_CODEC.decode(buffer),
                 ByteBufCodecs.VAR_INT.decode(buffer),
@@ -142,6 +145,7 @@ public record FarmInfoPayload(
     public FarmUIInfo toFarmUIInfo() {
         FarmUIInfo info = new FarmUIInfo();
         info.setTier(tier);
+        info.setMobRequiredTier(mobRequiredTier);
         info.setMobName(mobName);
         info.setMobCount(mobCount);
         info.setRecipeTotalPower(recipeTotalPower);
@@ -169,6 +173,7 @@ public record FarmInfoPayload(
         return new FarmInfoPayload(
             pos,
             info.getTier(),
+            info.getMobRequiredTier(),
             info.getMobName(),
             info.getMobCount(),
             info.getRecipeTotalPower(),

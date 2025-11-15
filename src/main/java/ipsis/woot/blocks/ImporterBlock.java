@@ -57,10 +57,9 @@ public class ImporterBlock extends BaseEntityBlock {
     @SuppressWarnings("deprecation")
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof ImporterBlockEntity importer) {
-                importer.clearContent();
-            }
+            // No need to clear content - importer has no internal storage
+            // It only proxies to adjacent containers
+
             // Notify adjacent Woot blocks to revalidate their structures
             WootBlockNotifier.notifyNearbyHearts(level, pos);
         }

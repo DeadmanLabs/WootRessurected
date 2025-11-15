@@ -1,0 +1,47 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " I ",
+    "PCE",
+    "IDI"
+  ],
+  "key": {
+    "P": {
+      "type": "neoforge:components",
+      "items": "minecraft:enchanted_book",
+      "components": {
+        "minecraft:stored_enchantments": {
+          "levels": {
+            "minecraft:power": 3
+          }
+        }
+      },
+      "strict": false
+    },
+    "E": {
+      "type": "neoforge:components",
+      "items": "minecraft:enchanted_book",
+      "components": {
+        "minecraft:stored_enchantments": {
+          "levels": {
+            "minecraft:efficiency": 3
+          }
+        }
+      },
+      "strict": false
+    },
+    "I": {
+      "item": "woot:cell_tier_ii"
+    },
+    "C": {
+      "item": "woot:factorycore_power"
+    },
+    "D": {
+      "item": "minecraft:dragon_egg"
+    }
+  },
+  "result": {
+    "id": "woot:cell_tier_iii"
+  }
+}

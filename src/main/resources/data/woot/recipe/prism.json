@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ROY",
+    "WCB",
+    "GLP"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:red_dye"
+    },
+    "O": {
+      "item": "minecraft:orange_dye"
+    },
+    "Y": {
+      "item": "minecraft:yellow_dye"
+    },
+    "W": {
+      "item": "minecraft:white_dye"
+    },
+    "B": {
+      "item": "minecraft:black_dye"
+    },
+    "G": {
+      "item": "minecraft:green_dye"
+    },
+    "L": {
+      "item": "minecraft:blue_dye"
+    },
+    "P": {
+      "item": "minecraft:purple_dye"
+    },
+    "C": {
+      "item": "minecraft:glass"
+    }
+  },
+  "result": {
+    "id": "woot:prism"
+  }
+}

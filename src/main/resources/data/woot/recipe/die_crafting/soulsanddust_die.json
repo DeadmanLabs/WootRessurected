@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:vanilla_die_crafting"
+    }
+  ],
+  "pattern": [
+    "HD ",
+    " S ",
+    "   "
+  ],
+  "key": {
+    "H": {
+      "item": "woot:yahhammer"
+    },
+    "D": {
+      "item": "woot:die_mesh"
+    },
+    "S": {
+      "item": "minecraft:soul_sand"
+    }
+  },
+  "result": {
+    "id": "woot:soulsanddust",
+    "count": 3
+  }
+}

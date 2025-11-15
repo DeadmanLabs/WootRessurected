@@ -3,11 +3,13 @@
   "default": {
     "efficiency": true,
     "items": [],
-    "fluids": []
+    "fluids": [],
+    "drops": []
   },
   "ingredients": [
     {
       "mobName": "minecraft:wither",
+      "tier": 3,
       "efficiency": true,
       "items": [
         {
@@ -19,10 +21,17 @@
           "count": 3
         }
       ],
-      "fluids": []
+      "fluids": [],
+      "drops": [
+        {
+          "item": "minecraft:nether_star",
+          "count": 1
+        }
+      ]
     },
     {
       "mobName": "minecraft:ender_dragon",
+      "tier": 4,
       "efficiency": true,
       "items": [
         {
@@ -30,7 +39,17 @@
           "count": 4
         }
       ],
-      "fluids": []
+      "fluids": [],
+      "drops": [
+        {
+          "item": "minecraft:dragon_egg",
+          "count": 1
+        },
+        {
+          "item": "minecraft:experience_bottle",
+          "count": 64
+        }
+      ]
     }
   ]
 }

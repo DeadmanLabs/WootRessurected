@@ -96,7 +96,7 @@ public class SpawnRecipeConsumer {
     }
 
     /**
-     * Check if importers contain enough of a specific item
+     * Check if importers (via their adjacent containers) contain enough of a specific item
      */
     private static boolean hasItem(@Nonnull Level level,
                                     @Nonnull List<BlockPos> importerPositions,
@@ -107,18 +107,11 @@ public class SpawnRecipeConsumer {
         for (BlockPos pos : importerPositions) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof ImporterBlockEntity importer) {
-                if (importer.hasItem(template, count - found)) {
-                    return true; // Found enough in this importer
-                }
-                // Check how much this importer has
-                for (int slot = 0; slot < importer.getContainerSize(); slot++) {
-                    ItemStack stack = importer.getItem(slot);
-                    if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
-                        found += stack.getCount();
-                        if (found >= count) {
-                            return true;
-                        }
-                    }
+                // Importer now checks adjacent containers automatically
+                int available = importer.getItemCount(template);
+                found += available;
+                if (found >= count) {
+                    return true;
                 }
             }
         }
@@ -127,7 +120,7 @@ public class SpawnRecipeConsumer {
     }
 
     /**
-     * Consume a specific item from importers
+     * Consume a specific item from importers (via their adjacent containers)
      */
     private static void consumeItem(@Nonnull Level level,
                                      @Nonnull List<BlockPos> importerPositions,
@@ -142,28 +135,18 @@ public class SpawnRecipeConsumer {
 
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof ImporterBlockEntity importer) {
+                // Importer now consumes from adjacent containers automatically
                 if (importer.consumeItem(template, remaining)) {
                     return; // All consumed
                 }
-                // Consume what we can from this importer
-                int beforeCount = remaining;
-                for (int slot = 0; slot < importer.getContainerSize(); slot++) {
-                    ItemStack stack = importer.getItem(slot);
-                    if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
-                        int toTake = Math.min(remaining, stack.getCount());
-                        stack.shrink(toTake);
-                        remaining -= toTake;
-                        if (stack.isEmpty()) {
-                            importer.setItem(slot, ItemStack.EMPTY);
-                        }
-                        if (remaining <= 0) {
-                            importer.setChanged();
-                            return;
-                        }
+
+                // Consume what we can from this importer's adjacent containers
+                int consumed = importer.getItemCount(template);
+                if (consumed > 0) {
+                    int toConsume = Math.min(remaining, consumed);
+                    if (importer.consumeItem(template, toConsume)) {
+                        remaining -= toConsume;
                     }
-                }
-                if (remaining < beforeCount) {
-                    importer.setChanged();
                 }
             }
         }

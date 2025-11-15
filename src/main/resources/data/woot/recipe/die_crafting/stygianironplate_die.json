@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:vanilla_die_crafting"
+    }
+  ],
+  "pattern": [
+    "HD ",
+    " I ",
+    "   "
+  ],
+  "key": {
+    "H": {
+      "item": "woot:yahhammer"
+    },
+    "D": {
+      "item": "woot:die_plate"
+    },
+    "I": {
+      "item": "woot:stygianironingot"
+    }
+  },
+  "result": {
+    "id": "woot:stygianironplate"
+  }
+}

@@ -167,6 +167,8 @@ public class IngredientLoader {
                 String mobName = mobObj.get("mobName").getAsString();
                 SpawnRecipe recipe = parseRecipe(mobObj);
                 repository.register(mobName, recipe);
+                Woot.LOGGER.info("Loaded recipe for {}: {} items, {} fluids, {} drops",
+                    mobName, recipe.getItems().size(), recipe.getFluids().size(), recipe.getDrops().size());
             }
         }
     }
@@ -209,6 +211,28 @@ public class IngredientLoader {
                     builder.addFluid(stack);
                 }
             }
+        }
+
+        // Parse configured drops (if specified)
+        if (obj.has("drops")) {
+            JsonArray drops = obj.getAsJsonArray("drops");
+            for (JsonElement element : drops) {
+                if (!element.isJsonObject()) continue;
+
+                JsonObject dropObj = element.getAsJsonObject();
+                ItemStack stack = parseItemStack(dropObj);
+                if (!stack.isEmpty()) {
+                    builder.addDrop(stack);
+                }
+            }
+        }
+
+        // Parse tier override (if specified)
+        if (obj.has("tier")) {
+            int tierInt = obj.get("tier").getAsInt();
+            ipsis.woot.multiblock.EnumMobFactoryTier tier = ipsis.woot.util.MobTierCalculator.getTierFromInt(tierInt);
+            builder.setRequiredTier(tier);
+            Woot.LOGGER.debug("Explicit tier override: {}", tier);
         }
 
         return builder.build();

@@ -1,163 +1,155 @@
 package ipsis.woot.blockentities;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Factory Importer Block Entity
- * Stores ingredient items that will be consumed by the factory
+ * Scans adjacent blocks for storage containers and uses their contents as ingredients
+ * Does NOT have internal storage - acts as a proxy to adjacent inventories
  */
-public class ImporterBlockEntity extends BlockEntity implements Container {
-
-    private static final int INVENTORY_SIZE = 27; // 3 rows of 9 slots
-    private NonNullList<ItemStack> inventory = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
-    private final IItemHandler itemHandler = new InvWrapper(this);
+public class ImporterBlockEntity extends BlockEntity {
 
     public ImporterBlockEntity(BlockPos pos, BlockState state) {
         super(WootBlockEntities.FACTORY_IMPORTER.get(), pos, state);
     }
 
     /**
-     * Get the item handler for external access (pipes, hoppers, etc.)
+     * Get all adjacent item handlers (excluding other importers)
+     * Checks all 6 faces for containers
      */
     @Nonnull
-    public IItemHandler getItemHandler() {
-        return itemHandler;
-    }
+    public List<IItemHandler> getAdjacentItemHandlers() {
+        List<IItemHandler> handlers = new ArrayList<>();
 
-    @Override
-    public int getContainerSize() {
-        return INVENTORY_SIZE;
-    }
+        if (level == null) {
+            return handlers;
+        }
 
-    @Override
-    public boolean isEmpty() {
-        for (ItemStack stack : inventory) {
-            if (!stack.isEmpty()) {
-                return false;
+        // Check all 6 faces
+        for (Direction direction : Direction.values()) {
+            BlockPos adjacentPos = worldPosition.relative(direction);
+            BlockEntity adjacentBE = level.getBlockEntity(adjacentPos);
+
+            // Skip if it's another importer
+            if (adjacentBE instanceof ImporterBlockEntity) {
+                continue;
             }
-        }
-        return true;
-    }
 
-    @Override
-    @Nonnull
-    public ItemStack getItem(int slot) {
-        if (slot < 0 || slot >= inventory.size()) {
-            return ItemStack.EMPTY;
-        }
-        return inventory.get(slot);
-    }
-
-    @Override
-    @Nonnull
-    public ItemStack removeItem(int slot, int amount) {
-        ItemStack result = ContainerHelper.removeItem(inventory, slot, amount);
-        if (!result.isEmpty()) {
-            setChanged();
-        }
-        return result;
-    }
-
-    @Override
-    @Nonnull
-    public ItemStack removeItemNoUpdate(int slot) {
-        return ContainerHelper.takeItem(inventory, slot);
-    }
-
-    @Override
-    public void setItem(int slot, @Nonnull ItemStack stack) {
-        if (slot >= 0 && slot < inventory.size()) {
-            inventory.set(slot, stack);
-            if (stack.getCount() > getMaxStackSize()) {
-                stack.setCount(getMaxStackSize());
-            }
-            setChanged();
-        }
-    }
-
-    @Override
-    public boolean stillValid(@Nonnull Player player) {
-        if (level == null || level.getBlockEntity(worldPosition) != this) {
-            return false;
-        }
-        return player.distanceToSqr(worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5) <= 64.0;
-    }
-
-    @Override
-    public void clearContent() {
-        inventory.clear();
-        setChanged();
-    }
-
-    /**
-     * Try to consume an item from the inventory
-     * Returns true if the item was found and consumed
-     */
-    public boolean consumeItem(@Nonnull ItemStack template, int count) {
-        int remaining = count;
-
-        for (int slot = 0; slot < inventory.size() && remaining > 0; slot++) {
-            ItemStack stack = inventory.get(slot);
-            if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
-                int toTake = Math.min(remaining, stack.getCount());
-                stack.shrink(toTake);
-                remaining -= toTake;
-
-                if (stack.isEmpty()) {
-                    inventory.set(slot, ItemStack.EMPTY);
+            // Check for IItemHandler capability
+            if (adjacentBE != null) {
+                IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjacentPos, direction.getOpposite());
+                if (handler != null) {
+                    handlers.add(handler);
                 }
             }
         }
 
-        if (remaining < count) {
-            setChanged();
-            return remaining == 0;
-        }
-
-        return false;
+        return handlers;
     }
 
     /**
-     * Check if the importer has a specific item with at least the given count
+     * Check if adjacent containers have a specific item with at least the given count
      */
     public boolean hasItem(@Nonnull ItemStack template, int count) {
-        int found = 0;
+        if (level == null) {
+            return false;
+        }
 
-        for (ItemStack stack : inventory) {
-            if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
-                found += stack.getCount();
-                if (found >= count) {
-                    return true;
+        int found = 0;
+        List<IItemHandler> handlers = getAdjacentItemHandlers();
+
+        for (IItemHandler handler : handlers) {
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
+                    found += stack.getCount();
+                    if (found >= count) {
+                        return true;
+                    }
                 }
             }
         }
 
-        return false;
+        return found >= count;
     }
 
-    @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ContainerHelper.saveAllItems(tag, inventory, registries);
+    /**
+     * Try to consume an item from adjacent containers
+     * Returns true if the full amount was consumed
+     */
+    public boolean consumeItem(@Nonnull ItemStack template, int count) {
+        if (level == null) {
+            return false;
+        }
+
+        int remaining = count;
+        List<IItemHandler> handlers = getAdjacentItemHandlers();
+
+        for (IItemHandler handler : handlers) {
+            if (remaining <= 0) {
+                break;
+            }
+
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                if (remaining <= 0) {
+                    break;
+                }
+
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
+                    // Try to extract items from this slot
+                    int toExtract = Math.min(remaining, stack.getCount());
+                    ItemStack extracted = handler.extractItem(slot, toExtract, false);
+
+                    if (!extracted.isEmpty()) {
+                        remaining -= extracted.getCount();
+                    }
+                }
+            }
+        }
+
+        return remaining == 0;
     }
 
-    @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        inventory = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, inventory, registries);
+    /**
+     * Check if this importer has access to any adjacent containers
+     */
+    public boolean hasAdjacentContainers() {
+        return !getAdjacentItemHandlers().isEmpty();
+    }
+
+    /**
+     * Get total count of a specific item in all adjacent containers
+     */
+    public int getItemCount(@Nonnull ItemStack template) {
+        if (level == null) {
+            return 0;
+        }
+
+        int found = 0;
+        List<IItemHandler> handlers = getAdjacentItemHandlers();
+
+        for (IItemHandler handler : handlers) {
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
+                    found += stack.getCount();
+                }
+            }
+        }
+
+        return found;
     }
 }

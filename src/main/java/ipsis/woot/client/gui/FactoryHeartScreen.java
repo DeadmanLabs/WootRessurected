@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
@@ -103,6 +104,7 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         // Render tooltips AFTER everything else (critical for proper display)
+        renderIngredientTooltips(guiGraphics, mouseX, mouseY);
         renderDropTooltips(guiGraphics, mouseX, mouseY);
     }
 
@@ -172,6 +174,70 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
         // Drops Panel
         int dropsHeight = HEIGHT - (GUI_Y_MARGIN * 2) - RECIPE_HEIGHT - (PROGRESS_HEIGHT * 2) - INGREDIENT_HEIGHT - (PANEL_MARGIN * 4);
         renderDropsPanel(guiGraphics, GUI_X_MARGIN, yOffset, panelWidth, dropsHeight);
+    }
+
+    /**
+     * Render tooltips for ingredient items when hovering
+     * Called from render() method with screen-absolute mouse coordinates
+     */
+    private void renderIngredientTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        List<ItemStack> ingredientItems = farmUIInfo.getIngredientsItems();
+        if (ingredientItems.isEmpty()) {
+            return;
+        }
+
+        // Calculate ingredients panel position (same as in renderLabels)
+        int panelWidth = WIDTH - (GUI_X_MARGIN * 2);
+        int yOffset = GUI_Y_MARGIN + RECIPE_HEIGHT + PANEL_MARGIN + PROGRESS_HEIGHT + PANEL_MARGIN +
+                      PROGRESS_HEIGHT + PANEL_MARGIN;
+
+        // Calculate content area (GUI-relative)
+        int guiRelativeX = GUI_X_MARGIN + PANEL_X_MARGIN + 2;
+        int guiRelativeY = yOffset + PANEL_Y_MARGIN + getTextHeight() + 2;
+
+        // Convert to screen-absolute coordinates
+        int contentX = leftPos + guiRelativeX;
+        int contentY = topPos + guiRelativeY;
+
+        int itemSize = 18;
+        int itemsPerRow = (panelWidth - PANEL_X_MARGIN * 2 - 4) / itemSize;
+        int row = 0;
+        int col = 0;
+
+        for (int i = 0; i < ingredientItems.size(); i++) {
+            ItemStack stack = ingredientItems.get(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            int itemX = contentX + (col * itemSize);
+            int itemY = contentY + (row * itemSize);
+
+            // Check if mouse is hovering over this item (screen-absolute comparison)
+            if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
+                // Create tooltip components
+                List<Component> tooltip = new ArrayList<>();
+                tooltip.add(stack.getHoverName());
+
+                // Show required count
+                tooltip.add(Component.literal("Required: " + stack.getCount()).withStyle(net.minecraft.ChatFormatting.GRAY));
+
+                // Show if ingredients are missing
+                if (farmUIInfo.hasMissingIngredients()) {
+                    tooltip.add(Component.literal("Missing ingredients!").withStyle(net.minecraft.ChatFormatting.RED));
+                }
+
+                // Render tooltip
+                guiGraphics.renderTooltip(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
+                return; // Only show one tooltip at a time
+            }
+
+            col++;
+            if (col >= itemsPerRow) {
+                col = 0;
+                row++;
+            }
+        }
     }
 
     /**
@@ -251,19 +317,31 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
             int powerPerTick = menu.getRecipePowerPerTick();
             int totalTime = menu.getRecipeTotalTime();
 
-            // Line 1: "Tier <TIER_NUMBER> <MOB> × <COUNT>" (white)
-            String tierRoman = getTierRoman(farmUIInfo.getTier().getLevel());
+            // Check if tier is sufficient
+            boolean tierSufficient = farmUIInfo.getTier().getLevel() >= farmUIInfo.getMobRequiredTier().getLevel();
+
+            // Line 1: "Tier <FACTORY_TIER> <MOB> (Req: Tier <MOB_TIER>) × <COUNT>"
+            String factoryTierRoman = getTierRoman(farmUIInfo.getTier().getLevel());
+            String mobRequiredTierRoman = getTierRoman(farmUIInfo.getMobRequiredTier().getLevel());
             String mobName = farmUIInfo.getMobName().getString();
-            String tierLine = "Tier " + tierRoman + " " + mobName + " \u00D7 " + mobCount;
-            drawText(guiGraphics, tierLine, contentX, contentY, COLOR_WHITE);
+            String tierLine = "Tier " + factoryTierRoman + " " + mobName +
+                " (Req: Tier " + mobRequiredTierRoman + ") \u00D7 " + mobCount;
+            int tierColor = tierSufficient ? COLOR_WHITE : COLOR_RED;
+            drawText(guiGraphics, tierLine, contentX, contentY, tierColor);
             contentY += getTextHeight();
 
-            // Line 2: "Power: 16,000RF @ 80RF/tick" (green)
+            // Show tier warning if insufficient
+            if (!tierSufficient) {
+                drawText(guiGraphics, "Factory Tier Too Low!", contentX, contentY, COLOR_RED);
+                contentY += getTextHeight();
+            }
+
+            // Power line
             String powerLine = "Power: " + dfCommas.format(totalPower) + "RF @ " + dfCommas.format(powerPerTick) + "RF/tick";
             drawText(guiGraphics, powerLine, contentX, contentY, COLOR_GREEN);
             contentY += getTextHeight();
 
-            // Line 3: "Time: 200 ticks" (green)
+            // Time line
             String timeLine = "Time: " + totalTime + " ticks";
             drawText(guiGraphics, timeLine, contentX, contentY, COLOR_GREEN);
         } else {
@@ -335,7 +413,39 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
         // Yellow header
         drawText(guiGraphics, "Ingredients", x, y, COLOR_YELLOW);
 
-        // TODO Phase 3: Render ingredient item stacks
+        // Render ingredient items in a grid
+        int contentX = x + PANEL_X_MARGIN + 2;
+        int contentY = y + PANEL_Y_MARGIN + getTextHeight() + 2;
+
+        List<ItemStack> ingredientItems = farmUIInfo.getIngredientsItems();
+        if (ingredientItems.isEmpty()) {
+            return;
+        }
+
+        int itemSize = 18; // Standard item render size (16px + 2px spacing)
+        int itemsPerRow = (width - PANEL_X_MARGIN * 2 - 4) / itemSize;
+        int row = 0;
+        int col = 0;
+
+        for (int i = 0; i < ingredientItems.size(); i++) {
+            ItemStack stack = ingredientItems.get(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            int itemX = contentX + (col * itemSize);
+            int itemY = contentY + (row * itemSize);
+
+            // Render the item
+            guiGraphics.renderItem(stack, itemX, itemY);
+            guiGraphics.renderItemDecorations(this.font, stack, itemX, itemY);
+
+            col++;
+            if (col >= itemsPerRow) {
+                col = 0;
+                row++;
+            }
+        }
     }
 
     private void renderDropsPanel(GuiGraphics guiGraphics, int x, int y, int width, int height) {

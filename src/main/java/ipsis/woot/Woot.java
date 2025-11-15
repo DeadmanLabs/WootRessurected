@@ -373,14 +373,10 @@ public class Woot {
             (blockEntity, direction) -> blockEntity.getItemHandler()
         );
 
-        // Register item handler capability for Factory Importer
-        // Always exposed to allow insertion of items
-        event.registerBlockEntity(
-            Capabilities.ItemHandler.BLOCK,
-            WootBlockEntities.FACTORY_IMPORTER.get(),
-            (blockEntity, direction) -> blockEntity.getItemHandler()
-        );
+        // Note: Factory Importer no longer has item handler capability
+        // It proxies to adjacent containers instead
+        // Pipes/hoppers should connect to the adjacent chests/containers, not the importer
 
-        LOGGER.info("Capabilities registered: Energy (Cell, Heart), ItemHandler (Exporter, Importer)");
+        LOGGER.info("Capabilities registered: Energy (Cell, Heart), ItemHandler (Exporter)");
     }
 }

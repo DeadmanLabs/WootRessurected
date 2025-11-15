@@ -15,7 +15,8 @@ import java.util.List;
 public class FarmUIInfo {
 
     // Configuration
-    private EnumMobFactoryTier tier = EnumMobFactoryTier.TIER_I;
+    private EnumMobFactoryTier tier = EnumMobFactoryTier.TIER_I; // Factory tier
+    private EnumMobFactoryTier mobRequiredTier = EnumMobFactoryTier.TIER_I; // Mob's required tier
     private Component mobName = Component.empty();
     private int mobCount = 0;
 
@@ -49,6 +50,7 @@ public class FarmUIInfo {
 
     // Getters
     public EnumMobFactoryTier getTier() { return tier; }
+    public EnumMobFactoryTier getMobRequiredTier() { return mobRequiredTier; }
     public Component getMobName() { return mobName; }
     public int getMobCount() { return mobCount; }
     public long getRecipeTotalPower() { return recipeTotalPower; }
@@ -68,6 +70,7 @@ public class FarmUIInfo {
 
     // Setters
     public void setTier(EnumMobFactoryTier tier) { this.tier = tier; }
+    public void setMobRequiredTier(EnumMobFactoryTier mobRequiredTier) { this.mobRequiredTier = mobRequiredTier; }
     public void setMobName(Component mobName) { this.mobName = mobName; }
     public void setMobCount(int mobCount) { this.mobCount = mobCount; }
     public void setRecipeTotalPower(long recipeTotalPower) { this.recipeTotalPower = recipeTotalPower; }

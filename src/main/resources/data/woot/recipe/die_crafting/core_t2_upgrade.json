@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "woot:vanilla_die_crafting"
+    }
+  ],
+  "pattern": [
+    "HD ",
+    " P ",
+    "L G"
+  ],
+  "key": {
+    "H": {
+      "item": "woot:yahhammer"
+    },
+    "D": {
+      "item": "woot:die_core"
+    },
+    "P": {
+      "item": "woot:stygianironplate"
+    },
+    "L": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    }
+  },
+  "result": {
+    "id": "woot:factorycore_t2_upgrade"
+  }
+}

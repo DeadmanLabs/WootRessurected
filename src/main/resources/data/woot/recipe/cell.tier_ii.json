@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IRI",
+    "RCR",
+    "IBI"
+  ],
+  "key": {
+    "B": {
+      "type": "neoforge:components",
+      "items": "minecraft:enchanted_book",
+      "components": {
+        "minecraft:stored_enchantments": {
+          "levels": {
+            "minecraft:power": 2
+          }
+        }
+      },
+      "strict": false
+    },
+    "I": {
+      "item": "woot:cell_tier_i"
+    },
+    "C": {
+      "item": "woot:factorycore_power"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "woot:cell_tier_ii"
+  }
+}

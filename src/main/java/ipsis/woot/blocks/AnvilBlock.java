@@ -119,6 +119,9 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
 
             if (!player.isCreative()) {
                 heldItem.shrink(1);
+            } else {
+                // In creative mode, clear the hand to allow immediate retrieval
+                player.setItemInHand(hand, ItemStack.EMPTY);
             }
 
             return ItemInteractionResult.SUCCESS;
@@ -126,8 +129,12 @@ public class AnvilBlock extends HorizontalDirectionalBlock implements EntityBloc
 
         // If anvil has a base item and player is empty-handed, retrieve the base item
         if (heldItem.isEmpty() && anvilBE.hasBaseItem()) {
-            ItemStack baseItem = anvilBE.getBaseItem();
-            player.setItemInHand(hand, baseItem.copy());
+            // In survival mode, give the item back to the player
+            // In creative mode, just destroy it (no need to give it back)
+            if (!player.isCreative()) {
+                ItemStack baseItem = anvilBE.getBaseItem();
+                player.setItemInHand(hand, baseItem.copy());
+            }
             anvilBE.clearBaseItem();
             return ItemInteractionResult.SUCCESS;
         }

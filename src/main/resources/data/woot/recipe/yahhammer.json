@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " BZ",
+    "SBB",
+    "BS "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:bone"
+    },
+    "S": {
+      "item": "minecraft:string"
+    },
+    "Z": {
+      "item": "minecraft:rotten_flesh"
+    }
+  },
+  "result": {
+    "id": "woot:yahhammer"
+  }
+}

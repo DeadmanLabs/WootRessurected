@@ -46,15 +46,21 @@ public class LootHelper {
         try {
             // Create a temporary entity to get its loot table
             Entity entity = entityType.create(level);
+            if (entity == null) {
+                Woot.LOGGER.warn("Failed to create entity of type {}, cannot generate loot", entityType);
+                return allDrops;
+            }
+
             if (!(entity instanceof LivingEntity livingEntity)) {
                 Woot.LOGGER.warn("Entity type {} is not a LivingEntity, cannot generate loot", entityType);
+                entity.discard();
                 return allDrops;
             }
 
             // Get the loot table location
             ResourceKey<LootTable> lootTableKey = livingEntity.getLootTable();
             if (lootTableKey == null) {
-                Woot.LOGGER.warn("Entity {} has no loot table", entityType);
+                Woot.LOGGER.warn("Entity {} has no loot table, returning empty drops", entityType);
                 livingEntity.discard();
                 return allDrops;
             }
@@ -74,18 +80,29 @@ public class LootHelper {
 
             // Get loot table and generate drops for each mob
             LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(lootTableKey);
+            if (lootTable == null || lootTable == LootTable.EMPTY) {
+                Woot.LOGGER.warn("Entity {} has empty loot table, returning empty drops", entityType);
+                livingEntity.discard();
+                return allDrops;
+            }
+
             for (int i = 0; i < count; i++) {
-                List<ItemStack> drops = lootTable.getRandomItems(lootParams);
-                allDrops.addAll(drops);
+                try {
+                    List<ItemStack> drops = lootTable.getRandomItems(lootParams);
+                    allDrops.addAll(drops);
+                } catch (Exception e) {
+                    Woot.LOGGER.error("Error generating loot for {} (iteration {}): {}", entityType, i, e.getMessage());
+                }
             }
 
             // Clean up temporary entity
             livingEntity.discard();
 
-            Woot.LOGGER.debug("Generated {} item stacks from {} × {} mobs", allDrops.size(), count, entityType);
+            Woot.LOGGER.debug("Generated {} item stacks from {} × {} mobs ({})",
+                allDrops.size(), count, entityType, entityType.getDescriptionId());
 
         } catch (Exception e) {
-            Woot.LOGGER.error("Error generating loot for entity type {}: {}", entityType, e.getMessage());
+            Woot.LOGGER.error("Error generating loot for entity type {}: {}", entityType, e.getMessage(), e);
         }
 
         return allDrops;
