@@ -17,10 +17,11 @@ import java.util.Map;
  */
 public class MobTierCalculator {
 
-    // Tier thresholds based on mob max health (matching original Woot)
-    private static final int TIER_2_MIN_HEALTH = 20;  // Tier 2: 20-39 HP
-    private static final int TIER_3_MIN_HEALTH = 40;  // Tier 3: 40-59 HP
-    private static final int TIER_4_MIN_HEALTH = 60;  // Tier 4: 60+ HP
+    // Tier thresholds based on mob max health
+    // Adjusted so common vanilla mobs (zombie/skeleton/creeper with 20 HP) are Tier I
+    private static final int TIER_2_MIN_HEALTH = 30;  // Tier 2: 30-49 HP (nether mobs, etc.)
+    private static final int TIER_3_MIN_HEALTH = 50;  // Tier 3: 50-99 HP (enderman, etc.)
+    private static final int TIER_4_MIN_HEALTH = 100; // Tier 4: 100+ HP (bosses)
 
     // Cache for calculated tiers to avoid repeated entity creation
     private static final Map<EntityType<?>, EnumMobFactoryTier> tierCache = new HashMap<>();
@@ -73,13 +74,13 @@ public class MobTierCalculator {
 
             EnumMobFactoryTier tier;
             if (maxHealth >= TIER_4_MIN_HEALTH) {
-                tier = EnumMobFactoryTier.TIER_IV;  // Bosses (60+ HP)
+                tier = EnumMobFactoryTier.TIER_IV;  // Bosses (100+ HP): Iron Golem, Wither, Ender Dragon
             } else if (maxHealth >= TIER_3_MIN_HEALTH) {
-                tier = EnumMobFactoryTier.TIER_III; // Powerful mobs (40-59 HP)
+                tier = EnumMobFactoryTier.TIER_III; // Powerful mobs (50-99 HP): Enderman (40), Ravager
             } else if (maxHealth >= TIER_2_MIN_HEALTH) {
-                tier = EnumMobFactoryTier.TIER_II;  // Nether/modded (20-39 HP)
+                tier = EnumMobFactoryTier.TIER_II;  // Harder mobs (30-49 HP): Piglin Brute, etc.
             } else {
-                tier = EnumMobFactoryTier.TIER_I;   // Basic mobs (< 20 HP)
+                tier = EnumMobFactoryTier.TIER_I;   // Common mobs (< 30 HP): Zombie, Skeleton, Creeper (20), Spider (16)
             }
 
             Woot.LOGGER.info("Mob {} has {} HP, assigned to tier {}",
