@@ -11,15 +11,19 @@ import ipsis.woot.blocks.FactoryCellBlock;
 import ipsis.woot.blocks.ImporterBlock;
 import ipsis.woot.blocks.LayoutBlock;
 import ipsis.woot.config.EnderShardConfig;
+import ipsis.woot.config.WootConfig;
 import ipsis.woot.crafting.AnvilRecipe;
+import ipsis.woot.crafting.conditions.ShardRecipeCondition;
 import ipsis.woot.items.ControllerBlockItem;
 import ipsis.woot.items.EnderShardItem;
 import ipsis.woot.items.FactoryBuilderItem;
 import ipsis.woot.items.WootDataComponents;
 import ipsis.woot.items.data.BuilderTierData;
 import ipsis.woot.items.data.EnderShardData;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -27,6 +31,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -34,6 +39,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -56,6 +62,7 @@ public class Woot {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MODID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
+    public static final DeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS = DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, MODID);
 
     // ========== RECIPE TYPES ==========
     public static final DeferredHolder<RecipeType<?>, RecipeType<AnvilRecipe>> ANVIL_RECIPE_TYPE =
@@ -68,6 +75,10 @@ public class Woot {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AnvilRecipe>> ANVIL_RECIPE_SERIALIZER =
         RECIPE_SERIALIZERS.register("anvil", AnvilRecipe.Serializer::new);
+
+    // ========== RECIPE CONDITIONS ==========
+    public static final DeferredHolder<MapCodec<? extends ICondition>, MapCodec<ShardRecipeCondition>> SHARD_RECIPE_CONDITION =
+        CONDITION_CODECS.register("shard_recipe", () -> ShardRecipeCondition.CODEC);
 
     // ========== SIMPLE BLOCKS ==========
     public static final DeferredBlock<Block> STYGIAN_IRON_ORE = BLOCKS.registerSimpleBlock("stygianironore",
@@ -317,7 +328,11 @@ public class Woot {
         WootMenuTypes.MENU_TYPES.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
+        CONDITION_CODECS.register(modEventBus);
         WootDataComponents.DATA_COMPONENTS.register(modEventBus);
+
+        // Register configuration
+        modContainer.registerConfig(ModConfig.Type.COMMON, WootConfig.SPEC);
 
         LOGGER.info("Woot mod initialized with ALL variants!");
     }

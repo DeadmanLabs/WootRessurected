@@ -300,8 +300,12 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         }
         List<ItemStack> mergedDrops = LootHelper.mergeItemStacks(drops);
 
-        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops, merged to {} stacks",
-            farmSetup.getProgrammedMob().displayName(), mobCount, drops.size(), mergedDrops.size());
+        // Generate tier shard bonus drops
+        List<ItemStack> tierShards = generateTierShards(farmSetup.getTier());
+        mergedDrops.addAll(tierShards);
+
+        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops, merged to {} stacks (+{} tier shards)",
+            farmSetup.getProgrammedMob().displayName(), mobCount, drops.size(), mergedDrops.size(), tierShards.size());
 
         for (ItemStack drop : mergedDrops) {
             Woot.LOGGER.info("  - {} x {}", drop.getItem(), drop.getCount());
@@ -318,6 +322,59 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
         // Reset progress for next cycle
         resetProgress();
+    }
+
+    /**
+     * Generate tier shard bonus drops based on factory tier and configuration
+     * Called during completeSpawnCycle() after normal loot generation
+     *
+     * Drop logic:
+     * - Tier I factory: Can only drop Tier II shards
+     * - Tier II factory: Can drop Tier II and Tier III shards
+     * - Tier III+ factory: Can drop Tier II, Tier III, and Tier IV shards
+     *
+     * @param factoryTier The tier of the factory
+     * @return List of tier shard ItemStacks (may be empty)
+     */
+    private List<ItemStack> generateTierShards(ipsis.woot.multiblock.EnumMobFactoryTier factoryTier) {
+        List<ItemStack> shardDrops = new ArrayList<>();
+
+        // Check if shard recipes are enabled in config
+        if (!ipsis.woot.config.WootConfig.ALLOW_SHARD_RECIPES.get()) {
+            return shardDrops;
+        }
+
+        // Roll for Tier II shard (all factory tiers can drop this)
+        if (factoryTier.getLevel() >= 1) {
+            int roll = level.random.nextInt(101); // 0-100
+            int chance = ipsis.woot.config.WootConfig.T2_SHARD_DROP_CHANCE.get();
+            if (roll <= chance) {
+                shardDrops.add(new ItemStack(Woot.SHARD_TIER_II.get(), 1));
+                Woot.LOGGER.debug("Tier II shard dropped! (rolled {} <= {}%)", roll, chance);
+            }
+        }
+
+        // Roll for Tier III shard (Tier II+ factories)
+        if (factoryTier.getLevel() >= 2) {
+            int roll = level.random.nextInt(101);
+            int chance = ipsis.woot.config.WootConfig.T3_SHARD_DROP_CHANCE.get();
+            if (roll <= chance) {
+                shardDrops.add(new ItemStack(Woot.SHARD_TIER_III.get(), 1));
+                Woot.LOGGER.debug("Tier III shard dropped! (rolled {} <= {}%)", roll, chance);
+            }
+        }
+
+        // Roll for Tier IV shard (Tier III+ factories)
+        if (factoryTier.getLevel() >= 3) {
+            int roll = level.random.nextInt(101);
+            int chance = ipsis.woot.config.WootConfig.T4_SHARD_DROP_CHANCE.get();
+            if (roll <= chance) {
+                shardDrops.add(new ItemStack(Woot.SHARD_TIER_IV.get(), 1));
+                Woot.LOGGER.debug("Tier IV shard dropped! (rolled {} <= {}%)", roll, chance);
+            }
+        }
+
+        return shardDrops;
     }
 
     /**
