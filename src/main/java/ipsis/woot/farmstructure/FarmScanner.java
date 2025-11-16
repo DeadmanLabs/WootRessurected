@@ -37,9 +37,12 @@ public class FarmScanner {
      */
     @Nullable
     public ScannedFarm scanFarm(@Nonnull Level level, @Nonnull BlockPos heartPos) {
-        // Try each tier from highest to lowest
-        for (EnumMobFactoryTier tier : EnumMobFactoryTier.values()) {
-            ScannedFarm farm = tryTier(level, heartPos, tier);
+        // Try each tier from highest to lowest to match the largest valid structure
+        // EnumMobFactoryTier.values() returns [TIER_I, TIER_II, TIER_III, TIER_IV]
+        // We need to iterate in reverse to try higher tiers first
+        EnumMobFactoryTier[] tiers = EnumMobFactoryTier.values();
+        for (int i = tiers.length - 1; i >= 0; i--) {
+            ScannedFarm farm = tryTier(level, heartPos, tiers[i]);
             if (farm != null) {
                 return farm;
             }
