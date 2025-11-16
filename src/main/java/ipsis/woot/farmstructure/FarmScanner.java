@@ -37,16 +37,24 @@ public class FarmScanner {
      */
     @Nullable
     public ScannedFarm scanFarm(@Nonnull Level level, @Nonnull BlockPos heartPos) {
+        Woot.LOGGER.info("=== FACTORY STRUCTURE SCAN START at {} ===", heartPos);
+
         // Try each tier from highest to lowest to match the largest valid structure
         // EnumMobFactoryTier.values() returns [TIER_I, TIER_II, TIER_III, TIER_IV]
         // We need to iterate in reverse to try higher tiers first
         EnumMobFactoryTier[] tiers = EnumMobFactoryTier.values();
         for (int i = tiers.length - 1; i >= 0; i--) {
+            Woot.LOGGER.info("Attempting to validate as {} structure...", tiers[i]);
             ScannedFarm farm = tryTier(level, heartPos, tiers[i]);
             if (farm != null) {
+                Woot.LOGGER.info("=== SUCCESS: Structure validated as {} ===", tiers[i]);
                 return farm;
+            } else {
+                Woot.LOGGER.info("{} validation FAILED, trying next tier", tiers[i]);
             }
         }
+
+        Woot.LOGGER.warn("=== FAILURE: No valid factory structure found at {} ===", heartPos);
         return null;
     }
 
@@ -56,8 +64,10 @@ public class FarmScanner {
     @Nullable
     private ScannedFarm tryTier(@Nonnull Level level, @Nonnull BlockPos heartPos, @Nonnull EnumMobFactoryTier tier) {
         List<FactoryPatternRepository.MobFactoryModule> modules = patternRepository.getAllModules(tier);
+        Woot.LOGGER.info("  {} pattern has {} module positions to validate", tier, modules.size());
 
         ScannedFarm farm = new ScannedFarm(heartPos, tier);
+        int validatedCount = 0;
 
         // Validate all modules in the pattern
         for (FactoryPatternRepository.MobFactoryModule module : modules) {
@@ -65,24 +75,32 @@ public class FarmScanner {
             BlockPos worldPos = heartPos.offset(offset);
 
             if (!validateModule(level, worldPos, tier, module.getModuleType(), farm)) {
+                Woot.LOGGER.info("  {} validation STOPPED: Module validation failed at {} (offset {})",
+                    tier, worldPos, offset);
                 return null;  // Invalid structure
             }
+            validatedCount++;
         }
+        Woot.LOGGER.info("  {} pattern modules validated: {}/{}", tier, validatedCount, modules.size());
 
         // Validate battery position (below heart with air gap)
         if (!validateBatteryPosition(level, heartPos, farm)) {
+            Woot.LOGGER.info("  {} validation STOPPED: Battery/component validation failed", tier);
             return null;  // Invalid structure - no battery or air gap
         }
+        Woot.LOGGER.info("  {} battery and components validated", tier);
 
         // Scan for required components (importer, exporter, controller)
         if (!scanForRequiredComponents(level, heartPos, tier, farm)) {
+            Woot.LOGGER.info("  {} validation STOPPED: Missing required components", tier);
             return null;  // Invalid structure - missing required components
         }
+        Woot.LOGGER.info("  {} required components found", tier);
 
         // Check if we have a programmed controller
         farm.setProgrammedMob(findProgrammedMob(level, farm.getControllerPositions()));
 
-        Woot.LOGGER.debug("Valid {} structure found at {}", tier, heartPos);
+        Woot.LOGGER.info("  {} structure fully validated at {}", tier, heartPos);
         return farm;
     }
 
@@ -116,7 +134,7 @@ public class FarmScanner {
         };
 
         if (!valid) {
-            Woot.LOGGER.debug("Invalid module at {}: expected {}, found {}", pos, expectedModule, block);
+            Woot.LOGGER.info("    MISMATCH at {}: expected {}, found {}", pos, expectedModule, block.getName().getString());
         }
 
         return valid;
