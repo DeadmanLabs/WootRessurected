@@ -13,7 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Calculates the required factory tier for spawning a mob
@@ -21,24 +20,15 @@ import java.util.Set;
  *
  * Tier logic:
  * - Tier 4: Custom only (requires JSON config override via SpawnRecipe)
- * - Tier 3: Wither, Ender Dragon, Warden ONLY (hardcoded)
- * - Tier 2: Iron Golem (hardcoded) + custom mobs (JSON override via SpawnRecipe)
- * - Tier 1: Vanilla mobs <30 HP (default for most mobs)
+ * - Tier 3: 100+ HP (Wither 300, Ender Dragon 200, Warden 500, etc.)
+ * - Tier 2: 30-100 HP (Iron Golem 100, Piglin Brute, etc.)
+ * - Tier 1: <30 HP (Creeper 20, Zombie 20, Skeleton 20, Spider 16, etc.)
  */
 public class MobTierCalculator {
 
-    // Health threshold for Tier 1 default assignment
-    private static final int TIER_1_MAX_HEALTH = 30;  // Vanilla mobs <30 HP default to Tier I
-
-    // Hardcoded Tier 3 mobs (bosses)
-    private static final Set<ResourceLocation> TIER_3_MOBS = Set.of(
-        ResourceLocation.withDefaultNamespace("wither"),
-        ResourceLocation.withDefaultNamespace("ender_dragon"),
-        ResourceLocation.withDefaultNamespace("warden")
-    );
-
-    // Hardcoded Tier 2 special case
-    private static final ResourceLocation IRON_GOLEM = ResourceLocation.withDefaultNamespace("iron_golem");
+    // Health thresholds for tier assignment
+    private static final int TIER_2_MIN_HEALTH = 30;   // Tier 2: 30-100 HP
+    private static final int TIER_3_MIN_HEALTH = 100;  // Tier 3: 100+ HP
 
     // Cache for calculated tiers to avoid repeated entity creation
     private static final Map<EntityType<?>, EnumMobFactoryTier> tierCache = new HashMap<>();
@@ -67,13 +57,14 @@ public class MobTierCalculator {
     }
 
     /**
-     * Internal tier calculation with correct tier logic
+     * Internal tier calculation with health-based logic
      *
      * Priority order:
-     * 1. Check SpawnRecipe for tier override (custom Tier 2 or Tier 4)
-     * 2. Check hardcoded Tier 3 mobs (Wither, Dragon, Warden)
-     * 3. Check hardcoded Tier 2 special case (Iron Golem)
-     * 4. Default to Tier 1 for vanilla mobs <30 HP
+     * 1. Check SpawnRecipe for tier override (allows custom Tier 2, 3, or 4)
+     * 2. Calculate tier based on mob max health:
+     *    - Tier 3: 100+ HP
+     *    - Tier 2: 30-100 HP
+     *    - Tier 1: <30 HP
      */
     @Nonnull
     private static EnumMobFactoryTier calculateTierInternal(@Nonnull ServerLevel level, @Nonnull EntityType<?> entityType) {
@@ -85,7 +76,7 @@ public class MobTierCalculator {
         }
 
         try {
-            // 1. Check SpawnRecipe for tier override (custom Tier 2 or Tier 4)
+            // 1. Check SpawnRecipe for tier override (allows Tier 4 and custom tier assignments)
             SpawnRecipe recipe = Woot.SPAWN_RECIPE_REPOSITORY.get(entityId);
             if (recipe.hasTierOverride()) {
                 EnumMobFactoryTier overrideTier = recipe.getRequiredTier();
@@ -93,20 +84,7 @@ public class MobTierCalculator {
                 return overrideTier;
             }
 
-            // 2. Check hardcoded Tier 3 mobs (Wither, Dragon, Warden)
-            if (TIER_3_MOBS.contains(entityId)) {
-                Woot.LOGGER.info("Mob {} is hardcoded Tier 3 boss mob", entityId);
-                return EnumMobFactoryTier.TIER_III;
-            }
-
-            // 3. Check hardcoded Tier 2 special case (Iron Golem)
-            if (entityId.equals(IRON_GOLEM)) {
-                Woot.LOGGER.info("Mob {} is hardcoded Tier 2 (Iron Golem)", entityId);
-                return EnumMobFactoryTier.TIER_II;
-            }
-
-            // 4. Default to Tier 1 for vanilla mobs <30 HP
-            // Create temporary entity to check health
+            // 2. Calculate tier based on max health
             Entity entity = entityType.create(level);
             if (entity == null) {
                 Woot.LOGGER.warn("Failed to create entity of type {} for health check, defaulting to TIER_I", entityId);
@@ -122,10 +100,18 @@ public class MobTierCalculator {
             float maxHealth = livingEntity.getMaxHealth();
             entity.discard();
 
-            // Assign Tier 1 for mobs <30 HP (most vanilla mobs)
-            // Unknown/modded mobs also default to Tier 1
-            Woot.LOGGER.info("Mob {} has {} HP, assigned to Tier 1 (default)", entityId, maxHealth);
-            return EnumMobFactoryTier.TIER_I;
+            // Calculate tier based on health thresholds
+            EnumMobFactoryTier tier;
+            if (maxHealth >= TIER_3_MIN_HEALTH) {
+                tier = EnumMobFactoryTier.TIER_III;  // 100+ HP: Wither, Dragon, Warden, Iron Golem
+            } else if (maxHealth >= TIER_2_MIN_HEALTH) {
+                tier = EnumMobFactoryTier.TIER_II;   // 30-99 HP: Piglin Brute, Enderman, etc.
+            } else {
+                tier = EnumMobFactoryTier.TIER_I;    // <30 HP: Zombie, Skeleton, Creeper, Spider
+            }
+
+            Woot.LOGGER.info("Mob {} has {} HP, assigned to {}", entityId, maxHealth, tier);
+            return tier;
 
         } catch (Exception e) {
             Woot.LOGGER.error("Error calculating tier for entity type {}: {}", entityId, e.getMessage());
