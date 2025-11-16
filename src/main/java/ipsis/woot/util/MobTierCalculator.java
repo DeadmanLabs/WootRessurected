@@ -20,15 +20,15 @@ import java.util.Map;
  *
  * Tier logic:
  * - Tier 4: Custom only (requires JSON config override via SpawnRecipe)
- * - Tier 3: 100+ HP (Wither 300, Ender Dragon 200, Warden 500, etc.)
+ * - Tier 3: 101+ HP (Wither 300, Ender Dragon 200, Warden 500, etc.)
  * - Tier 2: 30-100 HP (Iron Golem 100, Piglin Brute, etc.)
  * - Tier 1: <30 HP (Creeper 20, Zombie 20, Skeleton 20, Spider 16, etc.)
  */
 public class MobTierCalculator {
 
     // Health thresholds for tier assignment
-    private static final int TIER_2_MIN_HEALTH = 30;   // Tier 2: 30-100 HP
-    private static final int TIER_3_MIN_HEALTH = 100;  // Tier 3: 100+ HP
+    private static final int TIER_2_MIN_HEALTH = 30;   // Tier 2: 30-100 HP (inclusive)
+    private static final int TIER_3_MIN_HEALTH = 101;  // Tier 3: 101+ HP
 
     // Cache for calculated tiers to avoid repeated entity creation
     private static final Map<EntityType<?>, EnumMobFactoryTier> tierCache = new HashMap<>();
@@ -62,8 +62,8 @@ public class MobTierCalculator {
      * Priority order:
      * 1. Check SpawnRecipe for tier override (allows custom Tier 2, 3, or 4)
      * 2. Calculate tier based on mob max health:
-     *    - Tier 3: 100+ HP
-     *    - Tier 2: 30-100 HP
+     *    - Tier 3: 101+ HP
+     *    - Tier 2: 30-100 HP (inclusive)
      *    - Tier 1: <30 HP
      */
     @Nonnull
@@ -103,9 +103,9 @@ public class MobTierCalculator {
             // Calculate tier based on health thresholds
             EnumMobFactoryTier tier;
             if (maxHealth >= TIER_3_MIN_HEALTH) {
-                tier = EnumMobFactoryTier.TIER_III;  // 100+ HP: Wither, Dragon, Warden, Iron Golem
+                tier = EnumMobFactoryTier.TIER_III;  // 101+ HP: Wither, Dragon, Warden
             } else if (maxHealth >= TIER_2_MIN_HEALTH) {
-                tier = EnumMobFactoryTier.TIER_II;   // 30-99 HP: Piglin Brute, Enderman, etc.
+                tier = EnumMobFactoryTier.TIER_II;   // 30-100 HP: Iron Golem, Piglin Brute, Enderman, etc.
             } else {
                 tier = EnumMobFactoryTier.TIER_I;    // <30 HP: Zombie, Skeleton, Creeper, Spider
             }
