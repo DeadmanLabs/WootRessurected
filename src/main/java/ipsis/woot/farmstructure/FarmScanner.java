@@ -106,7 +106,7 @@ public class FarmScanner {
             case STRUCTURE_BLOCK_2 -> block == Woot.STRUCTURE_BLOCK_2.get();
             case STRUCTURE_BLOCK_3 -> block == Woot.STRUCTURE_BLOCK_3.get();
             case STRUCTURE_BLOCK_4 -> block == Woot.STRUCTURE_BLOCK_4.get();
-            case STRUCTURE_BLOCK_5 -> matchesAnyCap(block);
+            case STRUCTURE_BLOCK_5 -> block == Woot.STRUCTURE_BLOCK_5.get();
             case STRUCTURE_UPGRADE -> block == Woot.STRUCTURE_BLOCK_UPGRADE.get();
             case STRUCTURE_TIER_I_CAP -> block == Woot.STRUCTURE_TIER_I_CAP.get();
             case STRUCTURE_TIER_II_CAP -> block == Woot.STRUCTURE_TIER_II_CAP.get();
@@ -120,16 +120,6 @@ public class FarmScanner {
         }
 
         return valid;
-    }
-
-    /**
-     * Check if block matches any structure cap tier
-     */
-    private boolean matchesAnyCap(Block block) {
-        return block == Woot.STRUCTURE_TIER_I_CAP.get() ||
-               block == Woot.STRUCTURE_TIER_II_CAP.get() ||
-               block == Woot.STRUCTURE_TIER_III_CAP.get() ||
-               block == Woot.STRUCTURE_TIER_IV_CAP.get();
     }
 
     /**
