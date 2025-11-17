@@ -24,6 +24,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -200,7 +201,14 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
         if (remainingPower > 0) {
             // Still need more power - consume per tick
-            int powerPerTick = powerRecipe.getPowerPerTick();
+            // Apply efficiency multiplier and add upgrade power costs
+            int basePowerPerTick = powerRecipe.getPowerPerTick();
+            float efficiencyMultiplier = farmSetup.getEfficiencyMultiplier();
+            int upgradePowerCost = ipsis.woot.config.WootConfig.ENABLE_UPGRADE_POWER_COSTS.get()
+                ? farmSetup.getTotalUpgradePowerCost()
+                : 0;
+            int powerPerTick = (int)(basePowerPerTick * efficiencyMultiplier) + upgradePowerCost;
+
             int extracted = extractEnergyFromCells(powerPerTick);
 
             if (extracted > 0) {
@@ -295,8 +303,9 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             Woot.LOGGER.info("Using configured drops for {}: {} items", entityType, drops.size());
         } else {
             // Generate loot from mob loot tables (standard mobs)
-            drops = LootHelper.generateLoot(level, entityType, 0, mobCount);
-            Woot.LOGGER.info("Generated loot table drops for {}: {} items", entityType, drops.size());
+            int lootingLevel = farmSetup.getLootingLevel();
+            drops = LootHelper.generateLoot(level, entityType, lootingLevel, mobCount);
+            Woot.LOGGER.info("Generated loot table drops for {} with Looting {}: {} items", entityType, lootingLevel, drops.size());
         }
         List<ItemStack> mergedDrops = LootHelper.mergeItemStacks(drops);
 
@@ -304,8 +313,16 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         List<ItemStack> tierShards = generateTierShards(farmSetup.getTier());
         mergedDrops.addAll(tierShards);
 
-        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops, merged to {} stacks (+{} tier shards)",
-            farmSetup.getProgrammedMob().displayName(), mobCount, drops.size(), mergedDrops.size(), tierShards.size());
+        // Generate XP shard bonus drops
+        List<ItemStack> xpShards = generateXPShards(mobCount);
+        mergedDrops.addAll(xpShards);
+
+        // Generate head drops from decapitate upgrade
+        List<ItemStack> headDrops = generateHeadDrops(entityType, mobCount);
+        mergedDrops.addAll(headDrops);
+
+        Woot.LOGGER.info("Factory completed spawn cycle: {} × {} mobs, {} unique drops, merged to {} stacks (+{} tier shards, +{} XP shards, +{} heads)",
+            farmSetup.getProgrammedMob().displayName(), mobCount, drops.size(), mergedDrops.size(), tierShards.size(), xpShards.size(), headDrops.size());
 
         for (ItemStack drop : mergedDrops) {
             Woot.LOGGER.info("  - {} x {}", drop.getItem(), drop.getCount());
@@ -375,6 +392,117 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         }
 
         return shardDrops;
+    }
+
+    /**
+     * Generate XP shards based on mob count and XP upgrade
+     * Called during completeSpawnCycle() after tier shard generation
+     *
+     * XP calculation:
+     * - Base XP: 5 per hostile mob (configurable in future)
+     * - Multiplied by mob count
+     * - Multiplied by XP upgrade multiplier (1.0, 1.2, 1.4, or 1.8)
+     * - Converted to XP shard items (1 shard = 1 XP point)
+     *
+     * @param mobCount Number of mobs spawned
+     * @return List of XP shard ItemStacks (may be empty)
+     */
+    private List<ItemStack> generateXPShards(int mobCount) {
+        List<ItemStack> xpDrops = new ArrayList<>();
+
+        // Check if XP upgrade is installed
+        float xpMultiplier = farmSetup.getXPMultiplier();
+        if (xpMultiplier <= 1.0f) {
+            // No XP upgrade installed
+            return xpDrops;
+        }
+
+        // Base XP per mob (configurable)
+        int baseXPPerMob = ipsis.woot.config.WootConfig.XP_BASE_PER_MOB.get();
+
+        // Calculate total XP with multiplier
+        float totalXP = baseXPPerMob * mobCount * xpMultiplier;
+        int xpShardCount = Math.round(totalXP);
+
+        if (xpShardCount > 0) {
+            xpDrops.add(new ItemStack(Woot.XP_SHARD.get(), xpShardCount));
+            Woot.LOGGER.debug("Generated {} XP shards ({} mobs × {} base XP × {:.1f} multiplier)",
+                xpShardCount, mobCount, baseXPPerMob, xpMultiplier);
+        }
+
+        return xpDrops;
+    }
+
+    /**
+     * Generate head drops based on decapitate upgrade
+     * Called during completeSpawnCycle() after XP shard generation
+     *
+     * Head drop logic:
+     * - Rolls for each mob spawned based on decapitate chance (0%, 20%, 40%, or 80%)
+     * - Drops the appropriate mob head if successful
+     * - Only specific mobs have heads (zombie, skeleton, creeper, wither skeleton, etc.)
+     *
+     * @param entityType The mob entity type
+     * @param mobCount Number of mobs spawned
+     * @return List of head ItemStacks (may be empty)
+     */
+    private List<ItemStack> generateHeadDrops(EntityType<?> entityType, int mobCount) {
+        List<ItemStack> headDrops = new ArrayList<>();
+
+        // Check if decapitate upgrade is installed
+        float decapitateChance = farmSetup.getDecapitateChance();
+        if (decapitateChance <= 0.0f) {
+            // No decapitate upgrade installed
+            return headDrops;
+        }
+
+        // Determine which head this mob drops (if any)
+        Item headItem = getHeadForEntityType(entityType);
+        if (headItem == null) {
+            // This mob doesn't have a head item
+            return headDrops;
+        }
+
+        // Roll for head drops based on mob count and chance
+        int headCount = 0;
+        for (int i = 0; i < mobCount; i++) {
+            if (level.random.nextFloat() < decapitateChance) {
+                headCount++;
+            }
+        }
+
+        if (headCount > 0) {
+            headDrops.add(new ItemStack(headItem, headCount));
+            Woot.LOGGER.debug("Decapitate: Generated {} {} heads ({:.0f}% chance × {} mobs)",
+                headCount, headItem, decapitateChance * 100, mobCount);
+        }
+
+        return headDrops;
+    }
+
+    /**
+     * Get the head item for a specific entity type
+     * @param entityType The mob entity type
+     * @return The head Item, or null if the mob doesn't have a head
+     */
+    private Item getHeadForEntityType(EntityType<?> entityType) {
+        // Map entity types to their head items
+        if (entityType == EntityType.ZOMBIE) {
+            return net.minecraft.world.item.Items.ZOMBIE_HEAD;
+        } else if (entityType == EntityType.SKELETON) {
+            return net.minecraft.world.item.Items.SKELETON_SKULL;
+        } else if (entityType == EntityType.CREEPER) {
+            return net.minecraft.world.item.Items.CREEPER_HEAD;
+        } else if (entityType == EntityType.WITHER_SKELETON) {
+            return net.minecraft.world.item.Items.WITHER_SKELETON_SKULL;
+        } else if (entityType == EntityType.ENDER_DRAGON) {
+            return net.minecraft.world.item.Items.DRAGON_HEAD;
+        } else if (entityType == EntityType.PLAYER) {
+            return net.minecraft.world.item.Items.PLAYER_HEAD;
+        }
+
+        // No head item for this mob type
+        return null;
     }
 
     /**
@@ -724,22 +852,23 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
 
     /**
      * Get mob count (for display)
+     * Returns the number of mobs to spawn per cycle based on mass upgrade
      */
     public int getMobCount() {
-        // Phase 3 will add mob count configuration
-        // For now, default to 1 if programmed
         if (farmSetup != null && farmSetup.isProgrammed()) {
-            return 1;
+            return farmSetup.getMassSpawnCount();
         }
         return 0;
     }
 
     /**
      * Get total recipe time in ticks
+     * Returns the spawn duration adjusted by rate upgrade
      */
     public int getRecipeTotalTime() {
-        if (powerRecipe != null) {
-            return powerRecipe.getTicks();
+        if (powerRecipe != null && farmSetup != null) {
+            int baseTicks = powerRecipe.getTicks();
+            return farmSetup.getSpawnRateTicks(baseTicks);
         }
         return 0;
     }
@@ -908,6 +1037,9 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             } else {
                 info.setMobName(Component.literal("Not Programmed"));
             }
+
+            // Add upgrade information
+            info.getUpgradeUIInfo().updateFromFarmSetup(farmSetup.getUpgrades());
 
             // Add drop information (show cumulative learned drops)
             for (ItemStack drop : lastDrops) {

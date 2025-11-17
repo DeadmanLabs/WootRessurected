@@ -70,4 +70,29 @@ public class WootBlockEntities {
                             Woot.EXPORTER.get()
                     ).build(null)
             );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<UpgradeBlockEntity>> UPGRADE =
+            BLOCK_ENTITIES.register("upgrade", () ->
+                    BlockEntityType.Builder.of(
+                            UpgradeBlockEntity::new,
+                            Woot.UPGRADE_LOOTING_I.get(),
+                            Woot.UPGRADE_LOOTING_II.get(),
+                            Woot.UPGRADE_LOOTING_III.get(),
+                            Woot.UPGRADE_RATE_I.get(),
+                            Woot.UPGRADE_RATE_II.get(),
+                            Woot.UPGRADE_RATE_III.get(),
+                            Woot.UPGRADE_MASS_I.get(),
+                            Woot.UPGRADE_MASS_II.get(),
+                            Woot.UPGRADE_MASS_III.get(),
+                            Woot.UPGRADE_EFFICIENCY_I.get(),
+                            Woot.UPGRADE_EFFICIENCY_II.get(),
+                            Woot.UPGRADE_EFFICIENCY_III.get(),
+                            Woot.UPGRADE_XP_I.get(),
+                            Woot.UPGRADE_XP_II.get(),
+                            Woot.UPGRADE_XP_III.get(),
+                            Woot.UPGRADE_DECAPITATE_I.get(),
+                            Woot.UPGRADE_DECAPITATE_II.get(),
+                            Woot.UPGRADE_DECAPITATE_III.get()
+                    ).build(null)
+            );
 }

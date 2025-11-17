@@ -130,19 +130,56 @@ public class Woot {
     public static final DeferredBlock<Block> CELL_TIER_III = BLOCKS.register("cell_tier_iii", () ->
         new FactoryCellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), 3));
 
-    // ========== UPGRADE BLOCKS (10 variants) ==========
-    public static final DeferredBlock<Block> UPGRADE_XP = BLOCKS.registerSimpleBlock("upgrade_xp",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_RATE = BLOCKS.registerSimpleBlock("upgrade_rate",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_LOOTING = BLOCKS.registerSimpleBlock("upgrade_looting",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_MASS = BLOCKS.registerSimpleBlock("upgrade_mass",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_DECAPITATE = BLOCKS.registerSimpleBlock("upgrade_decapitate",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_EFFICIENCY = BLOCKS.registerSimpleBlock("upgrade_efficiency",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
+    // ========== UPGRADE BLOCKS (18 tiered variants: 6 types × 3 tiers) ==========
+    // LOOTING Upgrades (Tiers I, II, III)
+    public static final DeferredBlock<Block> UPGRADE_LOOTING_I = BLOCKS.register("upgrade_looting_i", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.LOOTING, 1));
+    public static final DeferredBlock<Block> UPGRADE_LOOTING_II = BLOCKS.register("upgrade_looting_ii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.LOOTING, 2));
+    public static final DeferredBlock<Block> UPGRADE_LOOTING_III = BLOCKS.register("upgrade_looting_iii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.LOOTING, 3));
+
+    // RATE Upgrades (Tiers I, II, III)
+    public static final DeferredBlock<Block> UPGRADE_RATE_I = BLOCKS.register("upgrade_rate_i", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.RATE, 1));
+    public static final DeferredBlock<Block> UPGRADE_RATE_II = BLOCKS.register("upgrade_rate_ii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.RATE, 2));
+    public static final DeferredBlock<Block> UPGRADE_RATE_III = BLOCKS.register("upgrade_rate_iii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.RATE, 3));
+
+    // MASS Upgrades (Tiers I, II, III)
+    public static final DeferredBlock<Block> UPGRADE_MASS_I = BLOCKS.register("upgrade_mass_i", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.MASS, 1));
+    public static final DeferredBlock<Block> UPGRADE_MASS_II = BLOCKS.register("upgrade_mass_ii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.MASS, 2));
+    public static final DeferredBlock<Block> UPGRADE_MASS_III = BLOCKS.register("upgrade_mass_iii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.MASS, 3));
+
+    // EFFICIENCY Upgrades (Tiers I, II, III)
+    public static final DeferredBlock<Block> UPGRADE_EFFICIENCY_I = BLOCKS.register("upgrade_efficiency_i", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.EFFICIENCY, 1));
+    public static final DeferredBlock<Block> UPGRADE_EFFICIENCY_II = BLOCKS.register("upgrade_efficiency_ii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.EFFICIENCY, 2));
+    public static final DeferredBlock<Block> UPGRADE_EFFICIENCY_III = BLOCKS.register("upgrade_efficiency_iii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.EFFICIENCY, 3));
+
+    // XP Upgrades (Tiers I, II, III)
+    public static final DeferredBlock<Block> UPGRADE_XP_I = BLOCKS.register("upgrade_xp_i", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.XP, 1));
+    public static final DeferredBlock<Block> UPGRADE_XP_II = BLOCKS.register("upgrade_xp_ii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.XP, 2));
+    public static final DeferredBlock<Block> UPGRADE_XP_III = BLOCKS.register("upgrade_xp_iii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.XP, 3));
+
+    // DECAPITATE Upgrades (Tiers I, II, III)
+    public static final DeferredBlock<Block> UPGRADE_DECAPITATE_I = BLOCKS.register("upgrade_decapitate_i", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.DECAPITATE, 1));
+    public static final DeferredBlock<Block> UPGRADE_DECAPITATE_II = BLOCKS.register("upgrade_decapitate_ii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.DECAPITATE, 2));
+    public static final DeferredBlock<Block> UPGRADE_DECAPITATE_III = BLOCKS.register("upgrade_decapitate_iii", () ->
+        new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.DECAPITATE, 3));
+
+    // ========== ADDON UPGRADE BLOCKS (Blood Magic, Extra Cells) ==========
     public static final DeferredBlock<Block> UPGRADE_BM_CRYSTAL = BLOCKS.registerSimpleBlock("upgrade_bm_crystal",
         BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
     public static final DeferredBlock<Block> UPGRADE_BM_LE_ALTAR = BLOCKS.registerSimpleBlock("upgrade_bm_le_altar",
@@ -219,13 +256,25 @@ public class Woot {
     public static final DeferredItem<BlockItem> CELL_TIER_II_ITEM = ITEMS.registerSimpleBlockItem("cell_tier_ii", CELL_TIER_II);
     public static final DeferredItem<BlockItem> CELL_TIER_III_ITEM = ITEMS.registerSimpleBlockItem("cell_tier_iii", CELL_TIER_III);
 
-    // Upgrade blocks
-    public static final DeferredItem<BlockItem> UPGRADE_XP_ITEM = ITEMS.registerSimpleBlockItem("upgrade_xp", UPGRADE_XP);
-    public static final DeferredItem<BlockItem> UPGRADE_RATE_ITEM = ITEMS.registerSimpleBlockItem("upgrade_rate", UPGRADE_RATE);
-    public static final DeferredItem<BlockItem> UPGRADE_LOOTING_ITEM = ITEMS.registerSimpleBlockItem("upgrade_looting", UPGRADE_LOOTING);
-    public static final DeferredItem<BlockItem> UPGRADE_MASS_ITEM = ITEMS.registerSimpleBlockItem("upgrade_mass", UPGRADE_MASS);
-    public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate", UPGRADE_DECAPITATE);
-    public static final DeferredItem<BlockItem> UPGRADE_EFFICIENCY_ITEM = ITEMS.registerSimpleBlockItem("upgrade_efficiency", UPGRADE_EFFICIENCY);
+    // Upgrade blocks (18 tiered variants)
+    public static final DeferredItem<BlockItem> UPGRADE_LOOTING_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_looting_i", UPGRADE_LOOTING_I);
+    public static final DeferredItem<BlockItem> UPGRADE_LOOTING_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_looting_ii", UPGRADE_LOOTING_II);
+    public static final DeferredItem<BlockItem> UPGRADE_LOOTING_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_looting_iii", UPGRADE_LOOTING_III);
+    public static final DeferredItem<BlockItem> UPGRADE_RATE_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_rate_i", UPGRADE_RATE_I);
+    public static final DeferredItem<BlockItem> UPGRADE_RATE_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_rate_ii", UPGRADE_RATE_II);
+    public static final DeferredItem<BlockItem> UPGRADE_RATE_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_rate_iii", UPGRADE_RATE_III);
+    public static final DeferredItem<BlockItem> UPGRADE_MASS_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_mass_i", UPGRADE_MASS_I);
+    public static final DeferredItem<BlockItem> UPGRADE_MASS_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_mass_ii", UPGRADE_MASS_II);
+    public static final DeferredItem<BlockItem> UPGRADE_MASS_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_mass_iii", UPGRADE_MASS_III);
+    public static final DeferredItem<BlockItem> UPGRADE_EFFICIENCY_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_efficiency_i", UPGRADE_EFFICIENCY_I);
+    public static final DeferredItem<BlockItem> UPGRADE_EFFICIENCY_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_efficiency_ii", UPGRADE_EFFICIENCY_II);
+    public static final DeferredItem<BlockItem> UPGRADE_EFFICIENCY_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_efficiency_iii", UPGRADE_EFFICIENCY_III);
+    public static final DeferredItem<BlockItem> UPGRADE_XP_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_xp_i", UPGRADE_XP_I);
+    public static final DeferredItem<BlockItem> UPGRADE_XP_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_xp_ii", UPGRADE_XP_II);
+    public static final DeferredItem<BlockItem> UPGRADE_XP_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_xp_iii", UPGRADE_XP_III);
+    public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate_i", UPGRADE_DECAPITATE_I);
+    public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate_ii", UPGRADE_DECAPITATE_II);
+    public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate_iii", UPGRADE_DECAPITATE_III);
     public static final DeferredItem<BlockItem> UPGRADE_BM_CRYSTAL_ITEM = ITEMS.registerSimpleBlockItem("upgrade_bm_crystal", UPGRADE_BM_CRYSTAL);
     public static final DeferredItem<BlockItem> UPGRADE_BM_LE_ALTAR_ITEM = ITEMS.registerSimpleBlockItem("upgrade_bm_le_altar", UPGRADE_BM_LE_ALTAR);
     public static final DeferredItem<BlockItem> UPGRADE_BM_LE_TANK_ITEM = ITEMS.registerSimpleBlockItem("upgrade_bm_le_tank", UPGRADE_BM_LE_TANK);
@@ -304,13 +353,25 @@ public class Woot {
             output.accept(CELL_TIER_II_ITEM.get());
             output.accept(CELL_TIER_III_ITEM.get());
 
-            // Upgrade blocks
-            output.accept(UPGRADE_XP_ITEM.get());
-            output.accept(UPGRADE_RATE_ITEM.get());
-            output.accept(UPGRADE_LOOTING_ITEM.get());
-            output.accept(UPGRADE_MASS_ITEM.get());
-            output.accept(UPGRADE_DECAPITATE_ITEM.get());
-            output.accept(UPGRADE_EFFICIENCY_ITEM.get());
+            // Upgrade blocks (18 tiered variants)
+            output.accept(UPGRADE_LOOTING_I_ITEM.get());
+            output.accept(UPGRADE_LOOTING_II_ITEM.get());
+            output.accept(UPGRADE_LOOTING_III_ITEM.get());
+            output.accept(UPGRADE_RATE_I_ITEM.get());
+            output.accept(UPGRADE_RATE_II_ITEM.get());
+            output.accept(UPGRADE_RATE_III_ITEM.get());
+            output.accept(UPGRADE_MASS_I_ITEM.get());
+            output.accept(UPGRADE_MASS_II_ITEM.get());
+            output.accept(UPGRADE_MASS_III_ITEM.get());
+            output.accept(UPGRADE_EFFICIENCY_I_ITEM.get());
+            output.accept(UPGRADE_EFFICIENCY_II_ITEM.get());
+            output.accept(UPGRADE_EFFICIENCY_III_ITEM.get());
+            output.accept(UPGRADE_XP_I_ITEM.get());
+            output.accept(UPGRADE_XP_II_ITEM.get());
+            output.accept(UPGRADE_XP_III_ITEM.get());
+            output.accept(UPGRADE_DECAPITATE_I_ITEM.get());
+            output.accept(UPGRADE_DECAPITATE_II_ITEM.get());
+            output.accept(UPGRADE_DECAPITATE_III_ITEM.get());
             output.accept(UPGRADE_BM_CRYSTAL_ITEM.get());
             output.accept(UPGRADE_BM_LE_ALTAR_ITEM.get());
             output.accept(UPGRADE_BM_LE_TANK_ITEM.get());

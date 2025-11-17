@@ -1,5 +1,6 @@
 package ipsis.woot.farmstructure;
 
+import ipsis.woot.farming.EnumFarmUpgrade;
 import ipsis.woot.items.data.EnderShardData;
 import ipsis.woot.multiblock.EnumMobFactoryTier;
 import ipsis.woot.power.FactoryEnergyStorage;
@@ -9,7 +10,9 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Stores the configuration of a formed multiblock structure
@@ -31,6 +34,9 @@ public class FarmSetup {
 
     // Aggregated energy storage from all cells
     private FactoryEnergyStorage aggregatedEnergy;
+
+    // Upgrade tracking - maps upgrade type to tier level (1-3)
+    private final Map<EnumFarmUpgrade, Integer> upgrades = new HashMap<>();
 
     public FarmSetup(@Nonnull Level level,
                      @Nonnull BlockPos heartPos,
@@ -178,10 +184,112 @@ public class FarmSetup {
         return aggregatedEnergy != null ? aggregatedEnergy.getMaxEnergyStored() : 0;
     }
 
+    // ========== UPGRADE SYSTEM ==========
+
+    /**
+     * Add an upgrade to the factory
+     * @param type Upgrade type
+     * @param tier Upgrade tier (1-3)
+     */
+    public void addUpgrade(@Nonnull EnumFarmUpgrade type, int tier) {
+        upgrades.put(type, tier);
+    }
+
+    /**
+     * Get the tier level of a specific upgrade
+     * @param type Upgrade type
+     * @return Tier level (1-3), or 0 if not installed
+     */
+    public int getUpgradeLevel(@Nonnull EnumFarmUpgrade type) {
+        return upgrades.getOrDefault(type, 0);
+    }
+
+    /**
+     * Check if an upgrade is installed
+     */
+    public boolean hasUpgrade(@Nonnull EnumFarmUpgrade type) {
+        return upgrades.containsKey(type);
+    }
+
+    /**
+     * Get all installed upgrades
+     */
+    @Nonnull
+    public Map<EnumFarmUpgrade, Integer> getUpgrades() {
+        return upgrades;
+    }
+
+    /**
+     * Get efficiency multiplier from efficiency upgrade
+     * @return Multiplier (1.0 = no reduction, 0.7 = 30% reduction)
+     */
+    public float getEfficiencyMultiplier() {
+        int tier = getUpgradeLevel(EnumFarmUpgrade.EFFICIENCY);
+        return tier > 0 ? EnumFarmUpgrade.EFFICIENCY.getEfficiencyMultiplier(tier) : 1.0f;
+    }
+
+    /**
+     * Get looting level from looting upgrade
+     * @return Looting level (0-3)
+     */
+    public int getLootingLevel() {
+        int tier = getUpgradeLevel(EnumFarmUpgrade.LOOTING);
+        return tier > 0 ? EnumFarmUpgrade.LOOTING.getLootingLevel(tier) : 0;
+    }
+
+    /**
+     * Get mass spawn count from mass upgrade
+     * @return Number of mobs to spawn per cycle (1, 4, 6, or 8)
+     */
+    public int getMassSpawnCount() {
+        int tier = getUpgradeLevel(EnumFarmUpgrade.MASS);
+        return tier > 0 ? EnumFarmUpgrade.MASS.getMassCount(tier) : 1;
+    }
+
+    /**
+     * Get spawn rate ticks from rate upgrade
+     * @param baseTicks Base tick duration (default 320)
+     * @return Adjusted tick duration (40, 80, 160, or baseTicks)
+     */
+    public int getSpawnRateTicks(int baseTicks) {
+        int tier = getUpgradeLevel(EnumFarmUpgrade.RATE);
+        return tier > 0 ? EnumFarmUpgrade.RATE.getSpawnRateTicks(tier, baseTicks) : baseTicks;
+    }
+
+    /**
+     * Get XP multiplier from XP upgrade
+     * @return Multiplier (1.0, 1.2, 1.4, or 1.8)
+     */
+    public float getXPMultiplier() {
+        int tier = getUpgradeLevel(EnumFarmUpgrade.XP);
+        return tier > 0 ? EnumFarmUpgrade.XP.getXPMultiplier(tier) : 1.0f;
+    }
+
+    /**
+     * Get decapitate (head drop) chance from decapitate upgrade
+     * @return Chance as a value from 0.0 to 1.0
+     */
+    public float getDecapitateChance() {
+        int tier = getUpgradeLevel(EnumFarmUpgrade.DECAPITATE);
+        return tier > 0 ? EnumFarmUpgrade.DECAPITATE.getDecapitateChance(tier) : 0.0f;
+    }
+
+    /**
+     * Get total additional power cost from all upgrades
+     * @return Total additional RF/tick from upgrades
+     */
+    public int getTotalUpgradePowerCost() {
+        int total = 0;
+        for (Map.Entry<EnumFarmUpgrade, Integer> entry : upgrades.entrySet()) {
+            total += entry.getKey().getPowerCostPerTick(entry.getValue());
+        }
+        return total;
+    }
+
     @Override
     public String toString() {
-        return String.format("FarmSetup{tier=%s, mob=%s, cells=%d, controllers=%d, energy=%d/%d}",
+        return String.format("FarmSetup{tier=%s, mob=%s, cells=%d, controllers=%d, energy=%d/%d, upgrades=%d}",
             tier, getMobName(), cellPositions.size(), controllerPositions.size(),
-            getTotalEnergyStored(), getTotalEnergyCapacity());
+            getTotalEnergyStored(), getTotalEnergyCapacity(), upgrades.size());
     }
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "woot:block/small_cube_wrapped_ii",
+  "textures": {
+    "all": "woot:block/upgrade_looting"
+  }
+}

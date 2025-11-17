@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "woot:block/upgrade_xp_ii"
+    },
+    "formed=true": {
+      "model": "woot:block/upgrade_xp_ii_active"
+    }
+  }
+}

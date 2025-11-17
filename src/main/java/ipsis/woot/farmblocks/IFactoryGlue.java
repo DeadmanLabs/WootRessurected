@@ -19,7 +19,8 @@ public interface IFactoryGlue {
         CELL,           // Power storage
         STRUCTURE,      // Structure blocks
         IMPORTER,       // Item/fluid import
-        EXPORTER        // Item/fluid export
+        EXPORTER,       // Item/fluid export
+        UPGRADE         // Upgrade blocks
     }
 
     /**

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "woot:block/upgrade_rate_iii"
+    },
+    "formed=true": {
+      "model": "woot:block/upgrade_rate_iii_active"
+    }
+  }
+}

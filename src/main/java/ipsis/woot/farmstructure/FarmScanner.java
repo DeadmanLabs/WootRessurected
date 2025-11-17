@@ -4,6 +4,7 @@ import ipsis.woot.Woot;
 import ipsis.woot.blockentities.FactoryCellBlockEntity;
 import ipsis.woot.blockentities.FactoryControllerBlockEntity;
 import ipsis.woot.blocks.FactoryCellBlock;
+import ipsis.woot.farming.EnumFarmUpgrade;
 import ipsis.woot.items.data.EnderShardData;
 import ipsis.woot.multiblock.EnumMobFactoryModule;
 import ipsis.woot.multiblock.EnumMobFactoryTier;
@@ -17,7 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Scans and validates the 3D multiblock structure
@@ -125,7 +128,17 @@ public class FarmScanner {
             case STRUCTURE_BLOCK_3 -> block == Woot.STRUCTURE_BLOCK_3.get();
             case STRUCTURE_BLOCK_4 -> block == Woot.STRUCTURE_BLOCK_4.get();
             case STRUCTURE_BLOCK_5 -> block == Woot.STRUCTURE_BLOCK_5.get();
-            case STRUCTURE_UPGRADE -> block == Woot.STRUCTURE_BLOCK_UPGRADE.get();
+            case STRUCTURE_UPGRADE -> {
+                boolean validBase = block == Woot.STRUCTURE_BLOCK_UPGRADE.get();
+                if (validBase) {
+                    // Scan for upgrade totem (vertical stack of 1-3 blocks) above the upgrade base
+                    UpgradeScanner.UpgradeInfo upgradeInfo = UpgradeScanner.scanUpgradeTotem(level, pos, tier);
+                    if (upgradeInfo != null) {
+                        farm.addUpgradeTotem(upgradeInfo.getType(), upgradeInfo.getTier(), upgradeInfo.getPositions());
+                    }
+                }
+                yield validBase;
+            }
             case STRUCTURE_TIER_I_CAP -> block == Woot.STRUCTURE_TIER_I_CAP.get();
             case STRUCTURE_TIER_II_CAP -> block == Woot.STRUCTURE_TIER_II_CAP.get();
             case STRUCTURE_TIER_III_CAP -> block == Woot.STRUCTURE_TIER_III_CAP.get();
@@ -270,6 +283,8 @@ public class FarmScanner {
         private final List<BlockPos> importerPositions = new ArrayList<>();
         private final List<BlockPos> exporterPositions = new ArrayList<>();
         private EnderShardData programmedMob = null;
+        private final Map<EnumFarmUpgrade, Integer> upgrades = new HashMap<>();
+        private final Map<EnumFarmUpgrade, List<BlockPos>> upgradeTotemPositions = new HashMap<>();
 
         public ScannedFarm(BlockPos heartPos, EnumMobFactoryTier tier) {
             this.heartPos = heartPos;
@@ -328,5 +343,36 @@ public class FarmScanner {
         public boolean isProgrammed() {
             return programmedMob != null;
         }
+
+        public void addUpgrade(EnumFarmUpgrade type, int tier) {
+            upgrades.put(type, tier);
+            Woot.LOGGER.debug("Added upgrade: {} Tier {} to scanned farm", type.getName(), tier);
+        }
+
+        /**
+         * Add an upgrade totem (vertical stack of upgrade blocks)
+         * @param type Upgrade type
+         * @param tier Final tier level (1-3)
+         * @param positions All block positions in the totem stack
+         */
+        public void addUpgradeTotem(EnumFarmUpgrade type, int tier, List<BlockPos> positions) {
+            upgrades.put(type, tier);
+            upgradeTotemPositions.put(type, new ArrayList<>(positions)); // Defensive copy
+            Woot.LOGGER.debug("Added upgrade totem: {} Tier {} ({} blocks) to scanned farm",
+                type.getName(), tier, positions.size());
+        }
+
+        public Map<EnumFarmUpgrade, Integer> getUpgrades() {
+            return upgrades;
+        }
+
+        /**
+         * Get all upgrade totem positions
+         * Maps upgrade type to list of block positions in that totem
+         */
+        public Map<EnumFarmUpgrade, List<BlockPos>> getUpgradeTotemPositions() {
+            return upgradeTotemPositions;
+        }
     }
 }
+

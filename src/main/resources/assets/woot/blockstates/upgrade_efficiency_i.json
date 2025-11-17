@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "woot:block/upgrade_efficiency_i"
+    },
+    "formed=true": {
+      "model": "woot:block/upgrade_efficiency_i_active"
+    }
+  }
+}

@@ -2,15 +2,19 @@ package ipsis.woot.farmstructure;
 
 import ipsis.woot.Woot;
 import ipsis.woot.blockentities.FactoryCellBlockEntity;
+import ipsis.woot.blockentities.UpgradeBlockEntity;
+import ipsis.woot.blocks.UpgradeBlock;
 import ipsis.woot.farmblocks.IFactoryGlueProvider;
 import ipsis.woot.power.FactoryEnergyStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -103,11 +107,32 @@ public class FarmStructure implements IFarmStructure {
         allBlocks.addAll(farm.getControllerPositions());
         allBlocks.addAll(farm.getCellPositions());
 
+        // Add all upgrade totem positions (all blocks in each vertical stack)
+        for (java.util.List<BlockPos> totemPositions : farm.getUpgradeTotemPositions().values()) {
+            allBlocks.addAll(totemPositions);
+        }
+
         for (BlockPos pos : allBlocks) {
             if (level.isLoaded(pos)) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof IFactoryGlueProvider provider) {
                     provider.getFactoryGlue().setMaster(origin);
+
+                    // Immediately update FORMED state for upgrade blocks
+                    if (be instanceof UpgradeBlockEntity upgradeEntity) {
+                        BlockState currentState = level.getBlockState(pos);
+                        if (currentState.getBlock() instanceof UpgradeBlock && !currentState.getValue(UpgradeBlock.FORMED)) {
+                            BlockState newState = currentState.setValue(UpgradeBlock.FORMED, true);
+                            // Use flag 11 to ensure client receives update and refreshes model
+                            // 11 = 1 (notify neighbors) | 2 (send to clients) | 8 (force re-render)
+                            level.setBlock(pos, newState, 11);
+                            // Explicitly sync BlockEntity data to client
+                            if (be instanceof UpgradeBlockEntity ube) {
+                                ube.sync();
+                            }
+                        }
+                    }
+
                     Woot.LOGGER.debug("Connected block at {} to master at {}", pos, origin);
                 }
             }
@@ -122,11 +147,32 @@ public class FarmStructure implements IFarmStructure {
         allBlocks.addAll(farm.getControllerPositions());
         allBlocks.addAll(farm.getCellPositions());
 
+        // Add all upgrade totem positions (all blocks in each vertical stack)
+        for (java.util.List<BlockPos> totemPositions : farm.getUpgradeTotemPositions().values()) {
+            allBlocks.addAll(totemPositions);
+        }
+
         for (BlockPos pos : allBlocks) {
             if (level.isLoaded(pos)) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof IFactoryGlueProvider provider) {
                     provider.getFactoryGlue().clearMaster();
+
+                    // Immediately update FORMED state for upgrade blocks
+                    if (be instanceof UpgradeBlockEntity upgradeEntity) {
+                        BlockState currentState = level.getBlockState(pos);
+                        if (currentState.getBlock() instanceof UpgradeBlock && currentState.getValue(UpgradeBlock.FORMED)) {
+                            BlockState newState = currentState.setValue(UpgradeBlock.FORMED, false);
+                            // Use flag 11 to ensure client receives update and refreshes model
+                            // 11 = 1 (notify neighbors) | 2 (send to clients) | 8 (force re-render)
+                            level.setBlock(pos, newState, 11);
+                            // Explicitly sync BlockEntity data to client
+                            if (be instanceof UpgradeBlockEntity ube) {
+                                ube.sync();
+                            }
+                        }
+                    }
+
                     Woot.LOGGER.debug("Disconnected block at {} from master", pos);
                 }
             }
@@ -144,10 +190,18 @@ public class FarmStructure implements IFarmStructure {
         Set<BlockPos> blocks1 = new HashSet<>();
         blocks1.addAll(farm1.getControllerPositions());
         blocks1.addAll(farm1.getCellPositions());
+        // Include all upgrade totem positions (all blocks in each vertical stack)
+        for (java.util.List<BlockPos> totemPositions : farm1.getUpgradeTotemPositions().values()) {
+            blocks1.addAll(totemPositions);
+        }
 
         Set<BlockPos> blocks2 = new HashSet<>();
         blocks2.addAll(farm2.getControllerPositions());
         blocks2.addAll(farm2.getCellPositions());
+        // Include all upgrade totem positions (all blocks in each vertical stack)
+        for (java.util.List<BlockPos> totemPositions : farm2.getUpgradeTotemPositions().values()) {
+            blocks2.addAll(totemPositions);
+        }
 
         return blocks1.equals(blocks2);
     }
@@ -179,6 +233,11 @@ public class FarmStructure implements IFarmStructure {
         // Add exporter positions
         for (BlockPos pos : currentFarm.getExporterPositions()) {
             setup.addExporterPosition(pos);
+        }
+
+        // Add upgrades
+        for (Map.Entry<ipsis.woot.farming.EnumFarmUpgrade, Integer> entry : currentFarm.getUpgrades().entrySet()) {
+            setup.addUpgrade(entry.getKey(), entry.getValue());
         }
 
         // Add cell positions and calculate aggregated energy
