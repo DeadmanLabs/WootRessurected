@@ -274,11 +274,12 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
         Woot.LOGGER.info("Spawn recipe for {}: {}", entityType, recipe != null ? recipe.toString() : "null");
 
         if (recipe != null && !recipe.isEmpty()) {
+            // Ingredients are consumed at a flat rate per cycle (not scaled by mass upgrade)
             boolean consumed = ipsis.woot.recipes.SpawnRecipeConsumer.consume(
                 level,
                 farmSetup.getImporterPositions(),
                 recipe,
-                mobCount,
+                1, // Always consume base recipe amount (mass upgrade affects drops, not costs)
                 false // Actually consume
             );
 
@@ -671,9 +672,11 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
                     this.energyStorage = aggregated;
                 }
 
-                // Update power recipe based on tier (matches original Woot)
+                // Update power recipe based on tier and rate upgrade
                 int tierLevel = farmSetup.getTier().getLevel(); // 1-4
-                this.powerRecipe = PowerRecipe.forTier(tierLevel, 320);
+                int baseTicks = 320; // Base spawn cycle duration
+                int adjustedTicks = farmSetup.getSpawnRateTicks(baseTicks); // Apply rate upgrade
+                this.powerRecipe = PowerRecipe.forTier(tierLevel, adjustedTicks);
 
                 // Check if programmed mob changed - reset drop statistics if so
                 String currentMobKey = farmSetup.isProgrammed() ? farmSetup.getProgrammedMob().entityKey() : null;
