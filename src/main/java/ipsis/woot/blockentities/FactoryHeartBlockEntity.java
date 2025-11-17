@@ -1052,20 +1052,15 @@ public class FactoryHeartBlockEntity extends BlockEntity implements IFactoryGlue
             // Add total samples for drop chance calculation
             info.setTotalSamples(totalSamples);
 
-            // Add spawn ingredient requirements
+            // Add spawn ingredient requirements (base amounts, not scaled by upgrades)
             ipsis.woot.recipes.SpawnRecipe spawnRecipe = getSpawnRecipe();
             if (spawnRecipe != null && !spawnRecipe.isEmpty()) {
-                int mobCount = getMobCount();
-                // Scale ingredients by mob count
+                // Show base recipe amounts - upgrades don't affect ingredient costs
                 for (ItemStack item : spawnRecipe.getItems()) {
-                    ItemStack scaled = item.copy();
-                    scaled.setCount(item.getCount() * mobCount);
-                    info.addIngredientItem(scaled);
+                    info.addIngredientItem(item.copy());
                 }
                 for (net.neoforged.neoforge.fluids.FluidStack fluid : spawnRecipe.getFluids()) {
-                    net.neoforged.neoforge.fluids.FluidStack scaled = fluid.copy();
-                    scaled.setAmount(fluid.getAmount() * mobCount);
-                    info.addIngredientFluid(scaled);
+                    info.addIngredientFluid(fluid.copy());
                 }
             }
         } else {
