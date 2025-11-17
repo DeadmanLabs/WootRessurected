@@ -66,10 +66,6 @@ public class UpgradeScanner {
         List<BlockPos> totemPositions = new ArrayList<>();
         totemPositions.add(tier1Pos);
 
-        Woot.LOGGER.debug("Found {} Tier I upgrade at {}", upgradeType.getName(), tier1Pos);
-        Woot.LOGGER.debug("Factory tier level: {}, can support up to Tier {} upgrades",
-            factoryTier.getLevel(), Math.min(3, factoryTier.getLevel()));
-
         // ========== TIER II: Second block (optional) ==========
         if (factoryTier.getLevel() >= 2) {
             BlockPos tier2Pos = basePos.above(2);
@@ -79,14 +75,10 @@ public class UpgradeScanner {
             EnumFarmUpgrade tier2Type = EnumFarmUpgrade.fromBlock(tier2Block);
             int tier2Level = EnumFarmUpgrade.getTierFromBlock(tier2Block);
 
-            Woot.LOGGER.debug("Tier II at {}: block={}, type={}, expectedType={}, tier={}, expectedTier=2",
-                tier2Pos, tier2Block, tier2Type, upgradeType, tier2Level);
-
             // Check if Tier II block matches
             if (tier2Type == upgradeType && tier2Level == 2) {
                 maxTier = 2;
                 totemPositions.add(tier2Pos);
-                Woot.LOGGER.debug("Found {} Tier II upgrade at {}", upgradeType.getName(), tier2Pos);
 
                 // ========== TIER III: Third block (optional, requires Tier II) ==========
                 if (factoryTier.getLevel() >= 3) {
@@ -97,30 +89,14 @@ public class UpgradeScanner {
                     EnumFarmUpgrade tier3Type = EnumFarmUpgrade.fromBlock(tier3Block);
                     int tier3Level = EnumFarmUpgrade.getTierFromBlock(tier3Block);
 
-                    Woot.LOGGER.debug("Tier III at {}: block={}, type={}, expectedType={}, tier={}, expectedTier=3",
-                        tier3Pos, tier3Block, tier3Type, upgradeType, tier3Level);
-
                     // Check if Tier III block matches
                     if (tier3Type == upgradeType && tier3Level == 3) {
                         maxTier = 3;
                         totemPositions.add(tier3Pos);
-                        Woot.LOGGER.debug("Found {} Tier III upgrade at {}", upgradeType.getName(), tier3Pos);
-                    } else {
-                        Woot.LOGGER.debug("Tier III validation failed - type match: {}, level match: {}",
-                            tier3Type == upgradeType, tier3Level == 3);
                     }
-                } else {
-                    Woot.LOGGER.debug("Factory tier {} is too low for Tier III upgrades (need >= 3)",
-                        factoryTier.getLevel());
                 }
-            } else {
-                Woot.LOGGER.debug("Tier II validation failed - type match: {}, level match: {}",
-                    tier2Type == upgradeType, tier2Level == 2);
             }
         }
-
-        Woot.LOGGER.info("Detected upgrade totem: {} Tier {} ({} blocks tall) at {}",
-            upgradeType.getName(), maxTier, totemPositions.size(), basePos);
 
         return new UpgradeInfo(upgradeType, maxTier, totemPositions);
     }

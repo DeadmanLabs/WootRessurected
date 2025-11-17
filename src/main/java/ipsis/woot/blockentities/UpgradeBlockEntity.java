@@ -52,24 +52,13 @@ public class UpgradeBlockEntity extends BlockEntity implements IFactoryGlueProvi
         boolean currentFormed = state.getValue(UpgradeBlock.FORMED);
         boolean shouldBeFormed = blockEntity.isFormed();
 
-        BlockPos master = blockEntity.getFactoryGlue().getMaster();
-        if (master != null && level.getGameTime() % 20 == 0) { // Log every second
-            ipsis.woot.Woot.LOGGER.debug("[SERVER] serverTick at {}: currentFormed={}, shouldBeFormed={}, master={}",
-                pos, currentFormed, shouldBeFormed, master);
-        }
-
         if (currentFormed != shouldBeFormed) {
-            ipsis.woot.Woot.LOGGER.info("[SERVER] UpgradeBlockEntity at {} changing FORMED from {} to {} (master={})",
-                pos, currentFormed, shouldBeFormed, master);
-
             BlockState newState = state.setValue(UpgradeBlock.FORMED, shouldBeFormed);
             // Use flag 11 to ensure client receives update and refreshes model
             // 11 = 1 (notify neighbors) | 2 (send to clients) | 8 (force re-render)
             level.setBlock(pos, newState, 11);
             // Explicitly sync BlockEntity data to client
             blockEntity.sync();
-
-            ipsis.woot.Woot.LOGGER.info("[SERVER] Sent block update to clients for {}", pos);
         }
     }
 
@@ -124,9 +113,6 @@ public class UpgradeBlockEntity extends BlockEntity implements IFactoryGlueProvi
             boolean formedFromNBT = tag.getBoolean("formed");
             BlockState currentState = getBlockState();
 
-            ipsis.woot.Woot.LOGGER.debug("[CLIENT] handleUpdateTag at {}, formed={}, currentState={}",
-                worldPosition, formedFromNBT, currentState);
-
             if (currentState.getBlock() instanceof ipsis.woot.blocks.UpgradeBlock) {
                 boolean currentFormed = currentState.getValue(ipsis.woot.blocks.UpgradeBlock.FORMED);
                 if (currentFormed != formedFromNBT) {
@@ -134,7 +120,6 @@ public class UpgradeBlockEntity extends BlockEntity implements IFactoryGlueProvi
                     level.setBlock(worldPosition, newState, 11);
                     // Force chunk section to re-render
                     level.sendBlockUpdated(worldPosition, currentState, newState, 11);
-                    ipsis.woot.Woot.LOGGER.info("[CLIENT] Updated blockstate FORMED from {} to {} and forced re-render", currentFormed, formedFromNBT);
                 }
             }
             requestModelDataUpdate();
@@ -156,9 +141,6 @@ public class UpgradeBlockEntity extends BlockEntity implements IFactoryGlueProvi
             boolean formedFromNBT = tag.getBoolean("formed");
             BlockState currentState = getBlockState();
 
-            ipsis.woot.Woot.LOGGER.debug("[CLIENT] onDataPacket at {}, formed={}, currentState={}",
-                worldPosition, formedFromNBT, currentState);
-
             if (currentState.getBlock() instanceof ipsis.woot.blocks.UpgradeBlock) {
                 boolean currentFormed = currentState.getValue(ipsis.woot.blocks.UpgradeBlock.FORMED);
                 if (currentFormed != formedFromNBT) {
@@ -166,7 +148,6 @@ public class UpgradeBlockEntity extends BlockEntity implements IFactoryGlueProvi
                     level.setBlock(worldPosition, newState, 11);
                     // Force chunk section to re-render
                     level.sendBlockUpdated(worldPosition, currentState, newState, 11);
-                    ipsis.woot.Woot.LOGGER.info("[CLIENT] Updated blockstate FORMED from {} to {} via onDataPacket and forced re-render", currentFormed, formedFromNBT);
                 }
             }
             requestModelDataUpdate();

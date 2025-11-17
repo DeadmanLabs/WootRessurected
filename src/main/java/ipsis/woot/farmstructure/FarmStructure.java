@@ -132,8 +132,6 @@ public class FarmStructure implements IFarmStructure {
                             }
                         }
                     }
-
-                    Woot.LOGGER.debug("Connected block at {} to master at {}", pos, origin);
                 }
             }
         }
@@ -172,8 +170,6 @@ public class FarmStructure implements IFarmStructure {
                             }
                         }
                     }
-
-                    Woot.LOGGER.debug("Disconnected block at {} from master", pos);
                 }
             }
         }
