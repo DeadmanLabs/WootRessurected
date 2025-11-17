@@ -43,7 +43,7 @@ public class FactoryHeartScreen extends AbstractContainerScreen<FactoryHeartMenu
     private static final int BAR_Y_MARGIN = 1;
 
     // Panel heights
-    private static final int RECIPE_HEIGHT = 55;
+    private static final int RECIPE_HEIGHT = 68;  // Increased to accommodate tier warning
     private static final int PROGRESS_HEIGHT = 18;
     private static final int INGREDIENT_HEIGHT = 40;
 

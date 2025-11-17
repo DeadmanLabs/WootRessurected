@@ -10,6 +10,7 @@ import ipsis.woot.blocks.FactoryControllerBlock;
 import ipsis.woot.blocks.FactoryCellBlock;
 import ipsis.woot.blocks.ImporterBlock;
 import ipsis.woot.blocks.LayoutBlock;
+import ipsis.woot.blocks.StructureBlock;
 import ipsis.woot.config.EnderShardConfig;
 import ipsis.woot.config.WootConfig;
 import ipsis.woot.crafting.AnvilRecipe;
@@ -101,26 +102,26 @@ public class Woot {
         new ExporterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion()));
 
     // ========== STRUCTURE BLOCKS (10 variants) ==========
-    public static final DeferredBlock<Block> STRUCTURE_BLOCK_1 = BLOCKS.registerSimpleBlock("structure_block_1",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_BLOCK_2 = BLOCKS.registerSimpleBlock("structure_block_2",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_BLOCK_3 = BLOCKS.registerSimpleBlock("structure_block_3",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_BLOCK_4 = BLOCKS.registerSimpleBlock("structure_block_4",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_BLOCK_5 = BLOCKS.registerSimpleBlock("structure_block_5",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_BLOCK_UPGRADE = BLOCKS.registerSimpleBlock("structure_block_upgrade",
-        BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_TIER_I_CAP = BLOCKS.registerSimpleBlock("structure_tier_i_cap",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_TIER_II_CAP = BLOCKS.registerSimpleBlock("structure_tier_ii_cap",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_TIER_III_CAP = BLOCKS.registerSimpleBlock("structure_tier_iii_cap",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
-    public static final DeferredBlock<Block> STRUCTURE_TIER_IV_CAP = BLOCKS.registerSimpleBlock("structure_tier_iv_cap",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL));
+    public static final DeferredBlock<Block> STRUCTURE_BLOCK_1 = BLOCKS.register("structure_block_1", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_BLOCK_2 = BLOCKS.register("structure_block_2", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_BLOCK_3 = BLOCKS.register("structure_block_3", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_BLOCK_4 = BLOCKS.register("structure_block_4", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_BLOCK_5 = BLOCKS.register("structure_block_5", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_BLOCK_UPGRADE = BLOCKS.register("structure_block_upgrade", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_TIER_I_CAP = BLOCKS.register("structure_tier_i_cap", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_TIER_II_CAP = BLOCKS.register("structure_tier_ii_cap", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_TIER_III_CAP = BLOCKS.register("structure_tier_iii_cap", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> STRUCTURE_TIER_IV_CAP = BLOCKS.register("structure_tier_iv_cap", () ->
+        new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL)));
 
     // ========== CELL BLOCKS (3 tiers) ==========
     public static final DeferredBlock<Block> CELL_TIER_I = BLOCKS.register("cell_tier_i", () ->
@@ -178,16 +179,6 @@ public class Woot {
         new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.DECAPITATE, 2));
     public static final DeferredBlock<Block> UPGRADE_DECAPITATE_III = BLOCKS.register("upgrade_decapitate_iii", () ->
         new ipsis.woot.blocks.UpgradeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion(), ipsis.woot.farming.EnumFarmUpgrade.DECAPITATE, 3));
-
-    // ========== ADDON UPGRADE BLOCKS (Blood Magic, Extra Cells) ==========
-    public static final DeferredBlock<Block> UPGRADE_BM_CRYSTAL = BLOCKS.registerSimpleBlock("upgrade_bm_crystal",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_BM_LE_ALTAR = BLOCKS.registerSimpleBlock("upgrade_bm_le_altar",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_BM_LE_TANK = BLOCKS.registerSimpleBlock("upgrade_bm_le_tank",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
-    public static final DeferredBlock<Block> UPGRADE_EC_BLOOD = BLOCKS.registerSimpleBlock("upgrade_ec_blood",
-        BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(3.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
 
     // ========== SIMPLE ITEMS ==========
     public static final DeferredItem<Item> STYGIAN_IRON_DUST = ITEMS.registerSimpleItem("stygianirondust");
@@ -275,10 +266,6 @@ public class Woot {
     public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_I_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate_i", UPGRADE_DECAPITATE_I);
     public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_II_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate_ii", UPGRADE_DECAPITATE_II);
     public static final DeferredItem<BlockItem> UPGRADE_DECAPITATE_III_ITEM = ITEMS.registerSimpleBlockItem("upgrade_decapitate_iii", UPGRADE_DECAPITATE_III);
-    public static final DeferredItem<BlockItem> UPGRADE_BM_CRYSTAL_ITEM = ITEMS.registerSimpleBlockItem("upgrade_bm_crystal", UPGRADE_BM_CRYSTAL);
-    public static final DeferredItem<BlockItem> UPGRADE_BM_LE_ALTAR_ITEM = ITEMS.registerSimpleBlockItem("upgrade_bm_le_altar", UPGRADE_BM_LE_ALTAR);
-    public static final DeferredItem<BlockItem> UPGRADE_BM_LE_TANK_ITEM = ITEMS.registerSimpleBlockItem("upgrade_bm_le_tank", UPGRADE_BM_LE_TANK);
-    public static final DeferredItem<BlockItem> UPGRADE_EC_BLOOD_ITEM = ITEMS.registerSimpleBlockItem("upgrade_ec_blood", UPGRADE_EC_BLOOD);
 
     // ========== CREATIVE TAB ==========
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> WOOT_TAB = CREATIVE_MODE_TABS.register("woot_tab", () -> CreativeModeTab.builder()
@@ -372,10 +359,6 @@ public class Woot {
             output.accept(UPGRADE_DECAPITATE_I_ITEM.get());
             output.accept(UPGRADE_DECAPITATE_II_ITEM.get());
             output.accept(UPGRADE_DECAPITATE_III_ITEM.get());
-            output.accept(UPGRADE_BM_CRYSTAL_ITEM.get());
-            output.accept(UPGRADE_BM_LE_ALTAR_ITEM.get());
-            output.accept(UPGRADE_BM_LE_TANK_ITEM.get());
-            output.accept(UPGRADE_EC_BLOOD_ITEM.get());
         }).build());
 
     public Woot(IEventBus modEventBus, ModContainer modContainer) {
